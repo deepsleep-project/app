@@ -24,20 +24,15 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/app-debug.apk
             build/ios/archive/Runner.xcarchive
-      - name: Create nightly release
-        id: create_release
-        uses: viperproject/create-nightly-release@v1
+      - name: Update Nightly Release
+        uses: andelf/nightly-release@main
         env:
-          # This token is provided by Actions, you do not need to create your own token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: nightly
-          release_name: Nightly Release
-          keep_num: 0
-          keep_tags: false
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
+          name: 'Nightly Release $$'
+          prerelease: true
+          body: 'Nightly release'
           files: |
             build/app/outputs/flutter-apk/app-debug.apk
             build/ios/archive/Runner.xcarchive
