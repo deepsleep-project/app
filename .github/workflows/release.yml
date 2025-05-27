@@ -17,7 +17,7 @@ jobs:
       - run: flutter pub get
       - run: flutter build apk --debug
       - run: flutter build xcarchive --no-codesign
-      - run: zip ios_xcarchive.zip build/ios/archive/Runner.xcarchive/
+      - run: zip -r ios_xcarchive.zip build/ios/archive/Runner.xcarchive/
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug.apk
