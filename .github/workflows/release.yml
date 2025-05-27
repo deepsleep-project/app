@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   build_android:
+    needs: [publish]
     runs-on: macos-latest
     name: Build android releases and push artifacts
     steps:
