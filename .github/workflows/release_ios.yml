@@ -1,0 +1,21 @@
+name: ios release
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    name: Build ios releases and push artifacts
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter build xcarchive --no-codesign
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app.xcarchive
+          path: build/ios/archive/Runner.xcarchive
