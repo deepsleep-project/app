@@ -61,6 +61,7 @@ flutter:
 
   assets:
     - assets/day.png
+    - assets/tent.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

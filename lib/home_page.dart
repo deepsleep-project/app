@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'tent_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +29,20 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _formattedTime = formatter.format(now);
     });
+  }
+
+  void _goToNextPage() {
+    Navigator.of(context).push(_createFadeRoute());
+  }
+
+  Route _createFadeRoute() {
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 500),
+      pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
   }
 
   @override
@@ -85,6 +100,17 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+            ),
+          ),
+
+          Positioned(
+            bottom: screenHeight * 0.2,
+            left: screenHeight * 0.08,
+            right: screenHeight * 0.1,
+            height: screenHeight * 0.19,
+            child: GestureDetector(
+              onTap: _goToNextPage,
+              child: Container(color: Colors.transparent),
             ),
           ),
         ],
