@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
           Align(
             alignment: Alignment.bottomRight,
             child: Image.asset(
-              'assets/day-left.png',
+              'assets/day.png',
               fit: BoxFit.fitHeight,
               height: MediaQuery.of(context).size.height,
             ),
