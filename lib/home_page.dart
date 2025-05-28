@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'tent_page.dart';
+import 'storage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,15 +13,16 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _formattedTime = '';
+  bool _isSleeping = false;
 
   @override
   void initState() {
     super.initState();
     _updateTime();
-    // Update time every minute
     Timer.periodic(Duration(seconds: 1), (timer) {
       _updateTime();
     });
+    _loadInitialState();
   }
 
   void _updateTime() {
@@ -31,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _goToNextPage() {
+    void _goToNextPage() {
     Navigator.of(context).push(_createFadeRoute());
   }
 
@@ -41,7 +43,87 @@ class _HomePageState extends State<HomePage> {
       pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
-      },
+       });
+    }
+
+
+  Future<void> _loadInitialState() async {
+    bool sleeping = await SleepStorage.loadIsSleeping();
+    setState(() {
+      _isSleeping = sleeping;
+    });
+  }
+
+  Future<void> _startSleep() async {
+    if (_isSleeping) {
+      _showSnackBar('already asleep');
+      return;
+    }
+    final now = DateTime.now().toIso8601String();
+    await SleepStorage.saveStartTime(now);
+    await SleepStorage.saveIsSleeping(true);
+    setState(() {
+      _isSleeping = true;
+    });
+    _showSnackBar('start sleep, current time: $_formattedTime');
+  }
+
+  Future<void> _endSleep() async {
+    if (!_isSleeping) {
+      _showSnackBar('not current sleeping');
+      return;
+    }
+    final end = DateTime.now().toIso8601String();
+    final start = await SleepStorage.loadStartTime();
+    if (start == null) {
+      _showSnackBar('null current time');
+      return;
+    }
+
+    final records = await SleepStorage.loadRecords();
+    records.add(SleepRecord(start: start, end: end));
+    await SleepStorage.saveRecords(records);
+    await SleepStorage.saveIsSleeping(false);
+
+    setState(() {
+      _isSleeping = false;
+    });
+
+    _showSnackBar('wake up, curent time: $_formattedTime');
+  }
+
+  Future<void> _viewHistory() async {
+    final records = await SleepStorage.loadRecords();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('History'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            itemCount: records.length,
+            itemBuilder: (context, index) {
+              final r = records[index];
+              return ListTile(
+                title: Text('Start: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.start))}'),
+                subtitle: Text('End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}'),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Shut down'),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -58,14 +140,11 @@ class _HomePageState extends State<HomePage> {
             child: Image.asset(
               'assets/day.png',
               fit: BoxFit.fitHeight,
-              height: MediaQuery.of(context).size.height,
+              height: screenHeight,
             ),
           ),
           Transform.translate(
-            offset: Offset(
-              0,
-              -screenHeight * 0.27,
-            ), // Adjust the vertical position
+            offset: Offset(0, -screenHeight * 0.20),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -75,34 +154,19 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       fontSize: 90,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white.withValues(alpha: 10),
+                      color: Colors.white.withAlpha(230),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle sleep action
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Good night!')));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 10),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Text('Go to sleep', style: TextStyle(fontSize: 18)),
-                  ),
+                  const SizedBox(height: 10),
+                  _buildButton('Start sleep', _startSleep),
+                  const SizedBox(height: 10),
+                  _buildButton('End sleep', _endSleep),
+                  const SizedBox(height: 10),
+                  _buildButton('Sleep history', _viewHistory),
                 ],
               ),
             ),
           ),
-
           Positioned(
             bottom: screenHeight * 0.2,
             left: screenHeight * 0.08,
@@ -115,6 +179,18 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white.withAlpha(200),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      ),
+      child: Text(text, style: const TextStyle(fontSize: 18)),
     );
   }
 }
