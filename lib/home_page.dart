@@ -1,3 +1,5 @@
+import 'package:drp_19/friend_page.dart';
+import 'package:drp_19/setting_page.dart';
 import 'package:drp_19/stat_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -46,6 +48,38 @@ class _HomePageState extends State<HomePage> {
     return PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 500),
       pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
+  }
+
+  // Navigate to friend_page
+  void _goToFriendPage() {
+    Navigator.of(context).push(_createFadeRouteToFriendPage());
+  }
+
+  // Create a fade transition route to the friend_page
+  Route _createFadeRouteToFriendPage() {
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) => FriendPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
+  }
+
+  // Navigate to setting_page
+  void _goToSettingPage() {
+    Navigator.of(context).push(_createFadeRouteToSettingPage());
+  }
+
+  // Create a fade transition route to the setting_page
+  Route _createFadeRouteToSettingPage() {
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) => SettingPage(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
@@ -181,6 +215,33 @@ class _HomePageState extends State<HomePage> {
                       _buildButton('Sleep history', _viewHistory),
                     ],
                   ),
+                ),
+              ),
+
+              // Toolbar friends icon to navigate to friends page
+              Positioned(
+                top: screenHeight * 0.07,
+                right: screenHeight * 0.03,
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _goToFriendPage,
+                      child: Icon(
+                        Icons.people,
+                        size: 40,
+                        color: Colors.white.withAlpha(230),
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    GestureDetector(
+                      onTap: _goToSettingPage,
+                      child: Icon(
+                        Icons.settings,
+                        size: 40,
+                        color: Colors.white.withAlpha(230),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 

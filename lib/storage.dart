@@ -39,6 +39,26 @@ class SleepStorage {
     await _storage.setItem('startTime', time);
   }
 
+  static Future<void> saveUsername(String username) async {
+    await _storage.ready;
+    await _storage.setItem('username', username);
+  }
+
+  static Future<String?> loadUsername() async {
+    await _storage.ready;
+    return _storage.getItem('username')?.toString();
+  }
+
+  static Future<void> saveUserId(int id) async {
+    await _storage.ready;
+    return _storage.setItem('userId', id);
+  }
+
+  static Future<int?> loadUserId() async {
+    await _storage.ready;
+    return _storage.getItem('userId') as int?;
+  }
+
   static Future<List<SleepRecord>> loadRecords() async {
     await _storage.ready;
     final list = _storage.getItem('records');
