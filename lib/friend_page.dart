@@ -1,7 +1,6 @@
 import 'package:drp_19/storage.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
+import 'internet.dart';
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
 
@@ -80,6 +79,7 @@ class _FriendPageState extends State<FriendPage> {
 
                   if (newUsername != null && newUsername.isNotEmpty) {
                     await SleepStorage.saveUsername(newUsername);
+                    final result = await fetchUid(newUsername);
                     setState(() {
                       _username = newUsername;
                     });

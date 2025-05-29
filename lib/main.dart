@@ -1,6 +1,5 @@
 import 'package:drp_19/home_page.dart';
 import 'package:flutter/material.dart';
-import 'statistic.dart';
 
 void main() {
   runApp(const MyApp());
