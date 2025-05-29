@@ -12,6 +12,7 @@ class FriendPage extends StatefulWidget {
 class _FriendPageState extends State<FriendPage> {
   String _username = '';
   String _userId = '';
+  String _tempFriendName = '';
 
   @override
   void initState() {
@@ -85,11 +86,12 @@ class _FriendPageState extends State<FriendPage> {
                     );
                     if (newUsername != null && newUsername.isNotEmpty) {
                       await SleepStorage.saveUsername(newUsername);
-                      final id = await fetchUid(newUsername);
+                      final id = await Internet.fetchUid(newUsername);
                       setState(() {
                         _username = newUsername;
                         _userId = id ?? '';
                       });
+                      await SleepStorage.saveUserId(_userId);
                       if (_userId.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Error fetching user ID')),
@@ -118,32 +120,39 @@ class _FriendPageState extends State<FriendPage> {
                 child: ElevatedButton(
                   onPressed: // Prompt user to enter friend's id
                   () async {
-                    String? newUsername = await showDialog<String>(
+                    String? friendUsername = await showDialog<String>(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('Enter friend\'s id'),
+                          title: Text('Enter friend\'s name'),
                           content: TextField(
                             onChanged: (value) {
-                              _username = value;
+                              _tempFriendName = value;
                             },
-                            decoration: InputDecoration(hintText: "ID"),
+                            decoration: InputDecoration(hintText: "name"),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () =>
-                                  Navigator.pop(context, _username),
+                                  Navigator.pop(context, _tempFriendName),
                               child: Text('Submit'),
                             ),
                           ],
                         );
                       },
                     );
-                    if (newUsername != null && newUsername.isNotEmpty) {
-                      await SleepStorage.saveUsername(newUsername);
-                      setState(() {
-                        _username = newUsername;
-                      });
+                    if (friendUsername != null && friendUsername.isNotEmpty) {
+                      bool? addFriendStates = await Internet.addFriend(_userId, friendUsername);
+                      if (addFriendStates ?? false) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('friend request sent')));
+                      } else {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('error sending friend request')));
+                      }
+
                     }
                   },
                   style: ElevatedButton.styleFrom(
