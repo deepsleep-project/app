@@ -149,14 +149,24 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               final r = records[index];
               return ListTile(
-                title: Text(
-                  'Start: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.start))}',
-                ),
-                subtitle: Text(
-                  'End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}',
-                ),
-                trailing: Text(
-                  'date: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date))}',
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Date: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date))}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Start: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.start))}\n'
+                          'End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}'
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               );
             },
