@@ -110,7 +110,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _endSleep() async {
-
     if (!_isSleeping) {
       _showSnackBar('not current sleeping');
       return;
@@ -124,7 +123,6 @@ class _HomePageState extends State<HomePage> {
     }
 
     final date = getAdjustedDate(DateTime.parse(start)).toIso8601String();
-
 
     final records = await SleepStorage.loadRecords();
     records.add(SleepRecord(start: start, end: end, date: date));

@@ -1,6 +1,7 @@
 import 'package:drp_19/storage.dart';
 import 'package:flutter/material.dart';
 import 'internet.dart';
+
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
 
@@ -10,6 +11,7 @@ class FriendPage extends StatefulWidget {
 
 class _FriendPageState extends State<FriendPage> {
   String _username = '';
+  String _userId = '';
 
   @override
   void initState() {
@@ -20,8 +22,10 @@ class _FriendPageState extends State<FriendPage> {
   // Load username and id from storage to local variables
   Future<void> _loadInitialUserState() async {
     String? username = await SleepStorage.loadUsername();
+    String? userId = await SleepStorage.loadUserId();
     setState(() {
-      _username = username ?? 'Unknown User';
+      _username = username ?? 'Not yet registered';
+      _userId = userId ?? '';
     });
   }
 
@@ -47,59 +51,119 @@ class _FriendPageState extends State<FriendPage> {
               ),
             ),
           ),
-          Positioned(
-            top: screenHeight * 0.08,
-            right: screenHeight * 0.03,
-            child: SizedBox(
-              width: 150,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: //Prompt user to enter new username
-                () async {
-                  String? newUsername = await showDialog<String>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Enter New Username'),
-                        content: TextField(
-                          onChanged: (value) {
-                            _username = value;
-                          },
-                          decoration: InputDecoration(hintText: "Username"),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, _username),
-                            child: Text('Submit'),
+          // Register button if username is not set
+          if (_userId.isEmpty)
+            Positioned(
+              top: screenHeight * 0.08,
+              right: screenHeight * 0.03,
+              child: SizedBox(
+                width: 150,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: //Prompt user to enter new username
+                  () async {
+                    String? newUsername = await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Enter your username'),
+                          content: TextField(
+                            onChanged: (value) {
+                              _username = value;
+                            },
+                            decoration: InputDecoration(hintText: "Username"),
                           ),
-                        ],
-                      );
-                    },
-                  );
-
-                  if (newUsername != null && newUsername.isNotEmpty) {
-                    await SleepStorage.saveUsername(newUsername);
-                    final result = await fetchUid(newUsername);
-                    setState(() {
-                      _username = newUsername;
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withAlpha(200),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pop(context, _username),
+                              child: Text('Submit'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (newUsername != null && newUsername.isNotEmpty) {
+                      await SleepStorage.saveUsername(newUsername);
+                      final id = await fetchUid(newUsername);
+                      setState(() {
+                        _username = newUsername;
+                        _userId = id ?? '';
+                      });
+                      if (_userId.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error fetching user ID')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withAlpha(200),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text("Register", style: const TextStyle(fontSize: 18)),
+                ),
+              ),
+            )
+          else
+            // If userId is set, show add friend button
+            Positioned(
+              top: screenHeight * 0.08,
+              right: screenHeight * 0.03,
+              child: SizedBox(
+                width: 150,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: // Prompt user to enter friend's id
+                  () async {
+                    String? newUsername = await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Enter friend\'s id'),
+                          content: TextField(
+                            onChanged: (value) {
+                              _username = value;
+                            },
+                            decoration: InputDecoration(hintText: "ID"),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pop(context, _username),
+                              child: Text('Submit'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (newUsername != null && newUsername.isNotEmpty) {
+                      await SleepStorage.saveUsername(newUsername);
+                      setState(() {
+                        _username = newUsername;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withAlpha(200),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text(
+                    "Add friend",
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
-                child: Text("Register", style: const TextStyle(fontSize: 18)),
               ),
             ),
-          ),
 
           // Friends list
           Center(
             child: Text(
-              _username,
+              '$_username $_userId',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),

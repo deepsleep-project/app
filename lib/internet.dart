@@ -11,11 +11,9 @@ Future<String?> fetchUid(String username) async {
   );
 
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    print(data['uid']);
-    return data['uid'];
+    final data = response.body;
+    return data;
   } else {
-    print('Failed to fetch UID. Status code: ${response.statusCode}');
     return null;
   }
 }
