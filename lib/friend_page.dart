@@ -1,6 +1,7 @@
 import 'package:drp_19/storage.dart';
 import 'package:flutter/material.dart';
 import 'internet.dart';
+import 'friend.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -33,6 +34,13 @@ class _FriendPageState extends State<FriendPage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    
+    //final friendList = await Internet.getFriendList(_username);
+    final List<FriendRecord> friends = [
+      FriendRecord(username: 'Alice', userId: '001'),
+      FriendRecord(username: 'Bob', userId: '002'),
+      FriendRecord(username: 'Charlie', userId: '003'),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -110,72 +118,101 @@ class _FriendPageState extends State<FriendPage> {
               ),
             )
           else
-            // If userId is set, show add friend button
-            Positioned(
-              top: screenHeight * 0.08,
-              right: screenHeight * 0.03,
-              child: SizedBox(
-                width: 150,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: // Prompt user to enter friend's id
-                  () async {
-                    String? friendUsername = await showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Enter friend\'s name'),
-                          content: TextField(
-                            onChanged: (value) {
-                              _tempFriendName = value;
-                            },
-                            decoration: InputDecoration(hintText: "name"),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pop(context, _tempFriendName),
-                              child: Text('Submit'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                    if (friendUsername != null && friendUsername.isNotEmpty) {
-                      bool? addFriendStates = await Internet.addFriend(_userId, friendUsername);
-                      if (addFriendStates ?? false) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('friend request sent')));
-                      } else {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('error sending friend request')));
-                      }
+            Scaffold(
+              appBar: AppBar(title: Text("Friends")),
+              body: Stack(
 
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withAlpha(200),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
+                children: [
+
+                  // Friends list
+                Align(
+                  alignment: Alignment.topLeft,
                   child: Text(
-                    "Add friend",
-                    style: const TextStyle(fontSize: 18),
+                    '   Your User Name: $_username',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ),
-            ),
+                  
 
-          // Friends list
-          Center(
-            child: Text(
-              '$_username $_userId',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
+                  // friend list
+                  Padding(
+                    padding: EdgeInsets.only(top: screenHeight * 0.12),
+                    child: ListView.builder(
+                      itemCount: friends.length,
+                      itemBuilder: (context, index) {
+                        final friend = friends[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            child: Text(friend.username[0]),
+                          ),
+                          title: Text(friend.username),
+                          subtitle: Text('ID: ${friend.userId}'),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // If userId is set, show add friend button
+                  Positioned(
+                    top: screenHeight * 0.05,
+                    right: screenHeight * 0.03,
+                    child: SizedBox(
+                      width: 150,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: // Prompt user to enter friend's id
+                        () async {
+                          String? friendUsername = await showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Enter friend\'s name'),
+                                content: TextField(
+                                  onChanged: (value) {
+                                    _tempFriendName = value;
+                                  },
+                                  decoration: InputDecoration(hintText: "name"),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, _tempFriendName),
+                                    child: Text('Submit'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (friendUsername != null && friendUsername.isNotEmpty) {
+                            bool? addFriendStates = await Internet.addFriend(_userId, friendUsername);
+                            if (addFriendStates ?? false) {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(SnackBar(content: Text('friend request sent')));
+                            } else {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(SnackBar(content: Text('error sending friend request')));
+                            }
+
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withAlpha(200),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          "Add friend",
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                  ),
+              ]
+            )
+          )
         ],
       ),
     );
