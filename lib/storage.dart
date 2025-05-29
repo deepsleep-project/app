@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:localstorage/localstorage.dart';
 
@@ -9,17 +8,11 @@ class SleepRecord {
   SleepRecord({required this.start, required this.end});
 
   Map<String, dynamic> toMap() {
-    return {
-      'start': start,
-      'end': end,
-    };
+    return {'start': start, 'end': end};
   }
 
   factory SleepRecord.fromMap(Map<String, dynamic> map) {
-    return SleepRecord(
-      start: map['start'],
-      end: map['end'],
-    );
+    return SleepRecord(start: map['start'], end: map['end']);
   }
 }
 
@@ -50,7 +43,9 @@ class SleepStorage {
     await _storage.ready;
     final list = _storage.getItem('records');
     if (list is List) {
-      return list.map((item) => SleepRecord.fromMap(Map<String, dynamic>.from(item))).toList();
+      return list
+          .map((item) => SleepRecord.fromMap(Map<String, dynamic>.from(item)))
+          .toList();
     }
     return [];
   }

@@ -1,3 +1,4 @@
+import 'package:drp_19/stat_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
@@ -19,12 +20,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _updateTime();
+    // Update the time every second
     Timer.periodic(Duration(seconds: 1), (timer) {
       _updateTime();
     });
-    _loadInitialState();
+    _loadInitialSleepState();
   }
 
+  // Update and format the current time
   void _updateTime() {
     final now = DateTime.now();
     final formatter = DateFormat('HH:mm');
@@ -33,21 +36,24 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-    void _goToNextPage() {
-    Navigator.of(context).push(_createFadeRoute());
+  // Navigate to tent_page
+  void _goToTentPage() {
+    Navigator.of(context).push(_createFadeRouteToTentPage());
   }
 
-  Route _createFadeRoute() {
+  // Create a fade transition route to the tent_page
+  Route _createFadeRouteToTentPage() {
     return PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 500),
       pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
-       });
-    }
+      },
+    );
+  }
 
-
-  Future<void> _loadInitialState() async {
+  // Load the initial sleep state from storage
+  Future<void> _loadInitialSleepState() async {
     bool sleeping = await SleepStorage.loadIsSleeping();
     setState(() {
       _isSleeping = sleeping;
@@ -76,7 +82,7 @@ class _HomePageState extends State<HomePage> {
     final end = DateTime.now().toIso8601String();
     final start = await SleepStorage.loadStartTime();
     if (start == null) {
-      _showSnackBar('null current time');
+      _showSnackBar('Error: start time not found');
       return;
     }
 
@@ -105,8 +111,12 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               final r = records[index];
               return ListTile(
-                title: Text('Start: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.start))}'),
-                subtitle: Text('End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}'),
+                title: Text(
+                  'Start: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.start))}',
+                ),
+                subtitle: Text(
+                  'End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}',
+                ),
               );
             },
           ),
@@ -115,16 +125,16 @@ class _HomePageState extends State<HomePage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text('Shut down'),
-          )
+          ),
         ],
       ),
     );
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -132,65 +142,108 @@ class _HomePageState extends State<HomePage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
+      body: PageView(
+        scrollDirection: Axis.vertical,
+        physics: const ClampingScrollPhysics(),
         children: [
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Image.asset(
-              'assets/day.png',
-              fit: BoxFit.fitHeight,
-              height: screenHeight,
-            ),
-          ),
-          Transform.translate(
-            offset: Offset(0, -screenHeight * 0.20),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _formattedTime,
-                    style: TextStyle(
-                      fontSize: 90,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withAlpha(230),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildButton('Start sleep', _startSleep),
-                  const SizedBox(height: 10),
-                  _buildButton('End sleep', _endSleep),
-                  const SizedBox(height: 10),
-                  _buildButton('Sleep history', _viewHistory),
-                ],
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Image.asset(
+                  'assets/day.png',
+                  fit: BoxFit.fitHeight,
+                  height: screenHeight,
+                ),
               ),
-            ),
+              Transform.translate(
+                offset: Offset(0, -screenHeight * 0.20),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formattedTime,
+                        style: TextStyle(
+                          fontFamily: "Digital",
+                          letterSpacing: -2,
+                          fontSize: 80,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (!_isSleeping)
+                        _buildButton('Go to bed', _startSleep)
+                      else
+                        _buildButton('End sleep', _endSleep),
+                      const SizedBox(height: 20),
+                      _buildButton('Sleep history', _viewHistory),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Invisible button to navigate to tent_page
+              Positioned(
+                bottom: screenHeight * 0.2,
+                left: screenHeight * 0.08,
+                right: screenHeight * 0.1,
+                height: screenHeight * 0.19,
+                child: GestureDetector(
+                  onTap: _goToTentPage,
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+
+              // Text "statistics" at bottom
+              Positioned(
+                bottom: screenHeight * 0.03,
+                left: screenHeight * 0.1,
+                right: screenHeight * 0.1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'statistics',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withAlpha(230),
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white.withAlpha(230),
+                      size: 50,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            bottom: screenHeight * 0.2,
-            left: screenHeight * 0.08,
-            right: screenHeight * 0.1,
-            height: screenHeight * 0.19,
-            child: GestureDetector(
-              onTap: _goToNextPage,
-              child: Container(color: Colors.transparent),
-            ),
-          ),
+          StatPage(),
         ],
       ),
     );
   }
 
+  // Helper method to build a button widget with common styles
   Widget _buildButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white.withAlpha(200),
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+    return SizedBox(
+      width: 200,
+      height: 60,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withAlpha(200),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        child: Text(text, style: const TextStyle(fontSize: 18)),
       ),
-      child: Text(text, style: const TextStyle(fontSize: 18)),
     );
   }
 }
