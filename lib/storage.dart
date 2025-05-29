@@ -4,15 +4,16 @@ import 'package:localstorage/localstorage.dart';
 class SleepRecord {
   final String start;
   final String end;
+  final String date;
 
-  SleepRecord({required this.start, required this.end});
+  SleepRecord({required this.start, required this.end, required this.date});
 
   Map<String, dynamic> toMap() {
-    return {'start': start, 'end': end};
+    return {'start': start, 'end': end, 'date': date};
   }
 
   factory SleepRecord.fromMap(Map<String, dynamic> map) {
-    return SleepRecord(start: map['start'], end: map['end']);
+    return SleepRecord(start: map['start'], end: map['end'],  date: map['date']);
   }
 }
 

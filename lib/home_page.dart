@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'tent_page.dart';
 import 'storage.dart';
+import 'statistic.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -109,19 +110,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _endSleep() async {
+
     if (!_isSleeping) {
       _showSnackBar('not current sleeping');
       return;
     }
     final end = DateTime.now().toIso8601String();
     final start = await SleepStorage.loadStartTime();
+
     if (start == null) {
       _showSnackBar('Error: start time not found');
       return;
     }
 
+    final date = getAdjustedDate(DateTime.parse(start)).toIso8601String();
+
+
     final records = await SleepStorage.loadRecords();
-    records.add(SleepRecord(start: start, end: end));
+    records.add(SleepRecord(start: start, end: end, date: date));
     await SleepStorage.saveRecords(records);
     await SleepStorage.saveIsSleeping(false);
 
@@ -150,6 +156,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 subtitle: Text(
                   'End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}',
+                ),
+                trailing: Text(
+                  'date: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date))}',
                 ),
               );
             },
