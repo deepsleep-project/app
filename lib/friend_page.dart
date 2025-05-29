@@ -14,6 +14,7 @@ class _FriendPageState extends State<FriendPage> {
   String _username = '';
   String _userId = '';
   String _tempFriendName = '';
+  List<FriendRecord> _friends = [];
 
   @override
   void initState() {
@@ -25,9 +26,11 @@ class _FriendPageState extends State<FriendPage> {
   Future<void> _loadInitialUserState() async {
     String? username = await SleepStorage.loadUsername();
     String? userId = await SleepStorage.loadUserId();
+    List<FriendRecord> friend = await Internet.getFriendList(userId ?? '');
     setState(() {
       _username = username ?? 'Not yet registered';
       _userId = userId ?? '';
+      _friends = friend;
     });
   }
 
@@ -35,12 +38,6 @@ class _FriendPageState extends State<FriendPage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     
-    //final friendList = await Internet.getFriendList(_username);
-    final List<FriendRecord> friends = [
-      FriendRecord(username: 'Alice', userId: '001'),
-      FriendRecord(username: 'Bob', userId: '002'),
-      FriendRecord(username: 'Charlie', userId: '003'),
-    ];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -136,15 +133,12 @@ class _FriendPageState extends State<FriendPage> {
 
                   // friend list
                   Padding(
-                    padding: EdgeInsets.only(top: screenHeight * 0.12),
+                    padding: EdgeInsets.only(top: screenHeight * 0.12, left: screenHeight * 0.05),
                     child: ListView.builder(
-                      itemCount: friends.length,
+                      itemCount: _friends.length,
                       itemBuilder: (context, index) {
-                        final friend = friends[index];
+                        final friend = _friends[index];
                         return ListTile(
-                          leading: CircleAvatar(
-                            child: Text(friend.username[0]),
-                          ),
                           title: Text(friend.username),
                           subtitle: Text('ID: ${friend.userId}'),
                         );
