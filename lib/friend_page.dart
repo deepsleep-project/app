@@ -2,6 +2,7 @@ import 'package:drp_19/friend_request.dart';
 import 'package:drp_19/storage.dart';
 import 'package:flutter/material.dart';
 import 'internet.dart';
+import 'friend.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -11,10 +12,21 @@ class FriendPage extends StatefulWidget {
 }
 
 class _FriendPageState extends State<FriendPage> {
-  String _username = '';
+  String _username = 'You are not registered yet';
   String _userId = '';
   String _tempFriendName = '';
+  List<FriendRecord> _friends = [];
   List<FriendRequest> _friendRequests = [];
+
+  final List<FriendRequest> _exampleRequests = [
+    FriendRequest(username: 'Richard', userId: '76789'),
+    FriendRequest(username: 'Linda', userId: '67890'),
+  ];
+
+  final List<FriendRecord> _exampleFriends = [
+    FriendRecord(username: 'Michael', userId: '25632'),
+    FriendRecord(username: 'Dave', userId: '52767'),
+  ];
 
   @override
   void initState() {
@@ -26,23 +38,19 @@ class _FriendPageState extends State<FriendPage> {
   Future<void> _loadInitialUserState() async {
     String? username = await SleepStorage.loadUsername();
     String? userId = await SleepStorage.loadUserId();
+    List<FriendRequest> requests =
+        await Internet.fetchFriendRequest(userId ?? '') ?? [];
+    List<FriendRecord> friends = await Internet.getFriendList(userId ?? '');
     setState(() {
       _username = username ?? 'Not yet registered';
       _userId = userId ?? '';
+      if (requests.isNotEmpty) _friendRequests = requests;
+      if (friends.isNotEmpty) _friends = friends;
     });
-  }
-
-  Future<void> _refreshFriendsList() async {
-    if (_userId.isNotEmpty) {
-      final requests = await Internet.fetchFriendRequest(_userId) ?? [];
-      setState(() {
-        _friendRequests = requests;
-      });
-      if (_friendRequests.isNotEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('You have new friend requests')));
-      }
+    if (_friendRequests.isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('You have new friend requests')));
     }
   }
 
@@ -68,7 +76,7 @@ class _FriendPageState extends State<FriendPage> {
               ),
             ),
           ),
-
+          // Refresh button
           Positioned(
             top: screenHeight * 0.08,
             right: screenHeight * 0.03,
@@ -79,7 +87,7 @@ class _FriendPageState extends State<FriendPage> {
                   width: 50,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _refreshFriendsList,
+                    onPressed: _loadInitialUserState,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white.withAlpha(200),
                       shape: RoundedRectangleBorder(
@@ -216,32 +224,56 @@ class _FriendPageState extends State<FriendPage> {
               ],
             ),
           ),
-          // ...existing code...
-          // add friend requests list
+
+          // Main content
           Positioned(
-            top:
-                screenHeight * 0.17, // adjust as needed to appear below buttons
-            left: screenHeight * 0.03,
-            right: screenHeight * 0.03,
+            top: screenHeight * 0.16,
+            left: screenHeight * 0.015,
+            right: screenHeight * 0.015,
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      _username,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                // User info container
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    top: 15,
+                    bottom: 15,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[100],
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black12, blurRadius: 4),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.person, color: Colors.blue, size: 28),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _username,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
-                    Text(
-                      _userId,
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
+                      Text(
+                        _userId,
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ),
-                FriendRequestList(friendRequests: _friendRequests),
+                // Show list of friend requests and friends
+                FriendRequestList(
+                  userId: _userId,
+                  friendRequests: _friendRequests,
+                ),
+                FriendList(friends: _friends),
               ],
             ),
           ),
@@ -251,10 +283,16 @@ class _FriendPageState extends State<FriendPage> {
   }
 }
 
+// FriendRequestList widget to display friend requests
 class FriendRequestList extends StatefulWidget {
+  final String userId;
   final List<FriendRequest> friendRequests;
 
-  const FriendRequestList({super.key, required this.friendRequests});
+  const FriendRequestList({
+    super.key,
+    required this.userId,
+    required this.friendRequests,
+  });
 
   @override
   _FriendRequestListState createState() => _FriendRequestListState();
@@ -265,57 +303,148 @@ class _FriendRequestListState extends State<FriendRequestList> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-        children: widget.friendRequests.map((request) {
-          return Container(
-            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Username on the left
-                Expanded(
-                  child: Text(request.username, style: TextStyle(fontSize: 18)),
+        children: [
+          if (widget.friendRequests.isNotEmpty)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
+                child: Text(
+                  'New friend request',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
-                // Buttons on the right
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle accept
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Icon(Icons.check, color: Colors.white, size: 20),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle decline
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Icon(Icons.close, color: Colors.white, size: 20),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          );
-        }).toList(),
+          ...widget.friendRequests.map((request) {
+            return Container(
+              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              padding: EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Username on the left
+                  Expanded(
+                    child: Text(
+                      request.username,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  // Buttons on the right
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle accept friend request
+                          Internet.respondToFriendRequest(
+                            widget.userId,
+                            request.userId,
+                            true,
+                          );
+                          setState(() {
+                            widget.friendRequests.remove(request);
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Icon(Icons.check, color: Colors.white, size: 20),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle reject friend request
+                          Internet.respondToFriendRequest(
+                            widget.userId,
+                            request.userId,
+                            false,
+                          );
+                          setState(() {
+                            widget.friendRequests.remove(request);
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Icon(Icons.close, color: Colors.white, size: 20),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
+    );
+  }
+}
+
+// FriendList widget to display all friends
+class FriendList extends StatefulWidget {
+  final List<FriendRecord> friends;
+
+  const FriendList({super.key, required this.friends});
+
+  @override
+  _FriendListState createState() => _FriendListState();
+}
+
+class _FriendListState extends State<FriendList> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: widget.friends
+          .map(
+            (friend) => Container(
+              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              padding: EdgeInsets.only(
+                left: 12,
+                right: 12,
+                top: 15,
+                bottom: 15,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.person, color: Colors.blueGrey, size: 28),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      friend.username,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    friend.userId,
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }

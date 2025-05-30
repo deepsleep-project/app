@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:drp_19/friend_request.dart';
 import 'package:http/http.dart' as http;
+import 'friend.dart';
 
 final String _serverURL = 'http://146.169.26.221:3000';
 
@@ -63,7 +64,6 @@ abstract class Internet {
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
-      print(response.body);
       requests = jsonList.cast<String>();
     } else {
       return null;
@@ -74,7 +74,36 @@ abstract class Internet {
       if (friendName == null) continue;
       friendRequests.add(FriendRequest(username: friendName, userId: reqID));
     }
-    print(friendRequests);
     return friendRequests;
+  }
+
+  static Future<List<FriendRecord>> getFriendList(String uid) async {
+    final url = Uri.parse('http://146.169.26.221:3000/friend/$uid');
+
+    final response = await http.get(url);
+
+    final ids = jsonDecode(response.body);
+
+    List<FriendRecord> result = [];
+
+    for (int i = 0; i < ids.length; i++) {
+      String? foo = await fetchFriendName(ids[i]);
+      result.add(FriendRecord(username: foo ?? '', userId: ids[i]));
+    }
+    return result;
+  }
+
+  static Future<void> respondToFriendRequest(
+    String userUID,
+    String friendUID,
+    bool accept,
+  ) async {
+    final url = Uri.parse('$_serverURL/friend/respond/$userUID');
+
+    await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': friendUID, 'accept': accept}),
+    );
   }
 }

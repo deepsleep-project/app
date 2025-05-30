@@ -3,4 +3,5 @@ class FriendRecord {
   final String userId;
 
   FriendRecord({required this.username, required this.userId});
+
 }

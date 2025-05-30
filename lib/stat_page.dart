@@ -26,6 +26,7 @@ class _StatPageState extends State<StatPage> {
         Transform.translate(
           offset: Offset(0, screenHeight * 0.1),
           child: Column(
+            spacing: 30,
             children: [
               Row(children: [Stack(children:[
                       
@@ -51,6 +52,146 @@ class _StatPageState extends State<StatPage> {
                     bottom: 12,
                   ),
                   child: LineChart(mainData()),
+                ),
+              ),
+
+              Text(
+                'Bed time this week',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              AspectRatio(
+                aspectRatio: 1.70,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    right: 30,
+                    left: 20,
+                    top: 24,
+                    bottom: 12,
+                  ),
+                  child: LineChart(
+                    LineChartData(
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: true,
+                        horizontalInterval: 1,
+                        verticalInterval: 1,
+                        getDrawingHorizontalLine: (value) {
+                          return const FlLine(
+                            color: Colors.grey,
+                            strokeWidth: 1,
+                          );
+                        },
+                        getDrawingVerticalLine: (value) {
+                          return const FlLine(
+                            color: Colors.grey,
+                            strokeWidth: 1,
+                          );
+                        },
+                      ),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            interval: 1,
+                            getTitlesWidget: bottomTitleWidgets,
+                          ),
+                        ),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            interval: 1,
+                            reservedSize: 50,
+                            getTitlesWidget: (value, meta) {
+                              const style = TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              );
+                              switch (value.toInt()) {
+                                case 22:
+                                  return Text(
+                                    '22:00',
+                                    style: style,
+                                    textAlign: TextAlign.center,
+                                  );
+                                case 23:
+                                  return Text(
+                                    '23:00',
+                                    style: style,
+                                    textAlign: TextAlign.center,
+                                  );
+                                case 24:
+                                  return Text(
+                                    '00:00',
+                                    style: style,
+                                    textAlign: TextAlign.center,
+                                  );
+                                case 25:
+                                  return Text(
+                                    '01:00',
+                                    style: style,
+                                    textAlign: TextAlign.center,
+                                  );
+                                case 26:
+                                  return Text(
+                                    '02:00',
+                                    style: style,
+                                    textAlign: TextAlign.center,
+                                  );
+                                default:
+                                  return Container();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      borderData: FlBorderData(
+                        show: true,
+                        border: Border.all(color: const Color(0xff37434d)),
+                      ),
+                      minX: 1,
+                      maxX: 7,
+                      minY: 21,
+                      maxY: 26,
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: const [
+                            FlSpot(1, 23), // Mon: 11 PM
+                            FlSpot(2, 24), // Tue: 12 AM
+                            FlSpot(3, 24.5), // Wed: 12:30 AM
+                            FlSpot(4, 25), // Thu: 1 AM
+                            FlSpot(5, 23.5), // Fri: 11:30 PM
+                            FlSpot(6, 24), // Sat: 12 AM
+                            FlSpot(7, 22.5), // Sun: 10:30 PM
+                          ],
+                          isCurved: false,
+                          gradient: LinearGradient(colors: gradientColors),
+                          barWidth: 5,
+                          isStrokeCapRound: true,
+                          dotData: const FlDotData(show: false),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            gradient: LinearGradient(
+                              colors: gradientColors
+                                  .map((color) => color.withOpacity(0.3))
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
