@@ -47,9 +47,9 @@ class TimePickerWithTap extends StatefulWidget {
   _TimePickerWithTapState createState() => _TimePickerWithTapState();
 }
 class _TimePickerWithTapState extends State<TimePickerWithTap> {
-  int startHour = 12;
+  int startHour = 0;
   int startMinute = 0;
-  int endHour = 12;
+  int endHour = 0;
   int endMinute = 0;
 
   Future<void> _loadInitialTargetState() async {
