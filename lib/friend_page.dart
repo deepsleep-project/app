@@ -86,22 +86,23 @@ class _FriendPageState extends State<FriendPage> {
                 SizedBox(
                   width: 50,
                   height: 50,
-                  child: ElevatedButton(
+                  child: IconButton(
                     onPressed: _loadInitialUserState,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withAlpha(200),
+                    style: IconButton.styleFrom(
+                      foregroundColor: Colors.deepPurple,
+                      backgroundColor: Colors.grey.withAlpha(50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: Center(child: Icon(Icons.refresh, size: 30)),
+                    icon: Icon(Icons.refresh, size: 30),
                   ),
                 ), // Register button if username is not set, otherwise show add friend button
                 _userId.isEmpty
                     ? SizedBox(
                         width: 150,
                         height: 50,
-                        child: ElevatedButton(
+                        child: IconButton(
                           onPressed: () async {
                             String? newUsername = await showDialog<String>(
                               context: context,
@@ -143,15 +144,19 @@ class _FriendPageState extends State<FriendPage> {
                               }
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withAlpha(200),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.grey.withAlpha(50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          child: Text(
+                          icon: Text(
                             "Register",
-                            style: const TextStyle(fontSize: 18),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple,
+                            ),
                           ),
                         ),
                       )
@@ -159,7 +164,7 @@ class _FriendPageState extends State<FriendPage> {
                       SizedBox(
                         width: 150,
                         height: 50,
-                        child: ElevatedButton(
+                        child: IconButton(
                           onPressed: () async {
                             String? friendUsername = await showDialog<String>(
                               context: context,
@@ -209,15 +214,18 @@ class _FriendPageState extends State<FriendPage> {
                               }
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withAlpha(200),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.grey.withAlpha(50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          child: Text(
+                          icon: Text(
                             "Add friend",
-                            style: const TextStyle(fontSize: 18),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.deepPurple,
+                            ),
                           ),
                         ),
                       ),
