@@ -16,14 +16,14 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter build apk --debug
-      - run: flutter build xcarchive --no-codesign
-      - run: zip -r ios_xcarchive.zip build/ios/archive/Runner.xcarchive/
+      # - run: flutter build xcarchive --no-codesign
+      # - run: zip -r ios_xcarchive.zip build/ios/archive/Runner.xcarchive/
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug.apk
-          path: |
+          path:
             build/app/outputs/flutter-apk/app-debug.apk
-            ios_xcarchive.zip
+            # ios_xcarchive.zip
       - name: Update Nightly Release
         uses: andelf/nightly-release@main
         env:
@@ -33,6 +33,6 @@ jobs:
           name: 'Nightly Release $$'
           prerelease: true
           body: 'Nightly release'
-          files: |
+          files:
             build/app/outputs/flutter-apk/app-debug.apk
-            ios_xcarchive.zip
+            # ios_xcarchive.zip

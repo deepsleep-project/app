@@ -88,8 +88,11 @@ abstract class Internet {
       List<FriendRecord> result = [];
 
       for (int i = 0; i < ids.length; i++) {
-        String? foo = await fetchFriendName(ids[i]);
-        result.add(FriendRecord(username: foo ?? '', userId: ids[i]));
+        String name = await fetchFriendName(ids[i]) ?? '';
+        bool isAsleep = await getAsleep(ids[i]);
+        result.add(
+          FriendRecord(username: name, userId: ids[i], isAsleep: isAsleep),
+        );
       }
       return result;
     } else {
@@ -108,6 +111,34 @@ abstract class Internet {
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'uid': friendUID, 'accept': accept}),
+    );
+  }
+
+  static Future<bool> getAsleep(String friendUID) async {
+    final url = Uri.parse('$_serverURL/awake/$friendUID');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return !(jsonDecode(response.body)["awake"] as bool);
+    } else {
+      return false;
+    }
+  }
+
+  static Future<void> setAsleep(String userUID) async {
+    final url = Uri.parse('$_serverURL/sleep');
+    await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': userUID}),
+    );
+  }
+
+  static Future<void> setAwake(String userUID) async {
+    final url = Uri.parse('$_serverURL/wake');
+    await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': userUID}),
     );
   }
 }
