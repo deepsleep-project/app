@@ -30,6 +30,25 @@ class SleepStorage {
     await _storage.setItem('isSleeping', value);
   }
 
+    static Future<String> loadTargetSleepTime() async {
+    await _storage.ready;
+    return _storage.getItem('TargetSleepTime') ?? "2025-01-01T23:00:00.000000";
+  }
+
+  static Future<void> saveTargetSleepTime(String value) async {
+    await _storage.ready;
+    await _storage.setItem('TargetSleepTime', value);
+  }
+    static Future<String> loadTargetWakeUpTime() async {
+    await _storage.ready;
+    return _storage.getItem('TargetWakeUpTime') ?? "2025-01-01T07:00:00.000000";
+  }
+
+  static Future<void> saveTargetWakeUpTime(String value) async {
+    await _storage.ready;
+    await _storage.setItem('TargetWakeUpTime', value);
+  }
+
   static Future<String?> loadStartTime() async {
     await _storage.ready;
     return _storage.getItem('startTime')?.toString();
