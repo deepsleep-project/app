@@ -12,7 +12,7 @@ class FriendPage extends StatefulWidget {
 }
 
 class _FriendPageState extends State<FriendPage> {
-  String _username = 'You are not registered yet';
+  String _username = 'You are not registered.';
   String _userId = '';
   String _tempFriendName = '';
   List<FriendRecord> _friends = [];
@@ -38,20 +38,26 @@ class _FriendPageState extends State<FriendPage> {
   Future<void> _loadInitialUserState() async {
     String? username = await SleepStorage.loadUsername();
     String? userId = await SleepStorage.loadUserId();
-    List<FriendRequest> requests =
-        await Internet.fetchFriendRequest(userId ?? '') ?? [];
-    List<FriendRecord> friends = await Internet.getFriendList(userId ?? '');
-    setState(() {
-      _username = username ?? 'Not yet registered';
-      _userId = userId ?? '';
-      if (requests.isNotEmpty) _friendRequests = requests;
-      if (friends.isNotEmpty) _friends = friends;
-    });
-    if (_friendRequests.isNotEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('You have new friend requests')));
+    List<FriendRequest> requests = [];
+    if (userId != null && userId.isNotEmpty) {
+      requests = await Internet.fetchFriendRequest(userId) ?? [];
     }
+    List<FriendRecord> friends = [];
+    if ((userId ?? '').isNotEmpty) {
+      friends = await Internet.getFriendList(userId!) ?? [];
+    }
+    setState(() {
+      _username = username ?? 'You are not registered.';
+      _userId = userId ?? '';
+
+      _friendRequests = requests;
+      _friends = friends;
+      if (_friendRequests.isNotEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('You have new friend requests')));
+      }
+    });
   }
 
   @override
@@ -128,19 +134,21 @@ class _FriendPageState extends State<FriendPage> {
                               },
                             );
                             if (newUsername != null && newUsername.isNotEmpty) {
-                              await SleepStorage.saveUsername(newUsername);
                               final id = await Internet.fetchUid(newUsername);
                               setState(() {
                                 _username = newUsername;
                                 _userId = id ?? '';
                               });
-                              await SleepStorage.saveUserId(_userId);
+
                               if (_userId.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Error fetching user ID'),
+                                    content: Text('Error registering user'),
                                   ),
                                 );
+                              } else {
+                                await SleepStorage.saveUsername(newUsername);
+                                await SleepStorage.saveUserId(_userId);
                               }
                             }
                           },

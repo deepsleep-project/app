@@ -77,20 +77,24 @@ abstract class Internet {
     return friendRequests;
   }
 
-  static Future<List<FriendRecord>> getFriendList(String uid) async {
-    final url = Uri.parse('http://146.169.26.221:3000/friend/$uid');
+  static Future<List<FriendRecord>?> getFriendList(String uid) async {
+    final url = Uri.parse('$_serverURL/friend/$uid');
 
     final response = await http.get(url);
 
-    final ids = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      final ids = jsonDecode(response.body);
 
-    List<FriendRecord> result = [];
+      List<FriendRecord> result = [];
 
-    for (int i = 0; i < ids.length; i++) {
-      String? foo = await fetchFriendName(ids[i]);
-      result.add(FriendRecord(username: foo ?? '', userId: ids[i]));
+      for (int i = 0; i < ids.length; i++) {
+        String? foo = await fetchFriendName(ids[i]);
+        result.add(FriendRecord(username: foo ?? '', userId: ids[i]));
+      }
+      return result;
+    } else {
+      return null;
     }
-    return result;
   }
 
   static Future<void> respondToFriendRequest(
