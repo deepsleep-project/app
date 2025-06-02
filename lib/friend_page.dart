@@ -24,8 +24,8 @@ class _FriendPageState extends State<FriendPage> {
   ];
 
   final List<FriendRecord> _exampleFriends = [
-    FriendRecord(username: 'Michael', userId: '25632'),
-    FriendRecord(username: 'Dave', userId: '52767'),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: false),
   ];
 
   @override
@@ -38,18 +38,54 @@ class _FriendPageState extends State<FriendPage> {
   Future<void> _loadInitialUserState() async {
     String? username = await SleepStorage.loadUsername();
     String? userId = await SleepStorage.loadUserId();
-    List<FriendRequest> requests = [];
-    if (userId != null && userId.isNotEmpty) {
-      requests = await Internet.fetchFriendRequest(userId) ?? [];
-    }
-    List<FriendRecord> friends = [];
-    if ((userId ?? '').isNotEmpty) {
-      friends = await Internet.getFriendList(userId!) ?? [];
-    }
+
     setState(() {
       _username = username ?? 'You are not registered.';
       _userId = userId ?? '';
+    });
+    List<FriendRequest> requests = [];
+    List<FriendRecord> friends = [];
+    bool timeout = false;
 
+    if (userId != null && userId.isNotEmpty) {
+      try {
+        requests =
+            await Internet.fetchFriendRequest(userId).timeout(
+              const Duration(seconds: 2),
+              onTimeout: () {
+                timeout = true;
+                return [];
+              },
+            ) ??
+            [];
+      } catch (_) {
+        timeout = true;
+      }
+    }
+
+    if ((userId ?? '').isNotEmpty && (!timeout)) {
+      try {
+        friends =
+            await Internet.getFriendList(userId!).timeout(
+              const Duration(seconds: 2),
+              onTimeout: () {
+                timeout = true;
+                return [];
+              },
+            ) ??
+            [];
+      } catch (_) {
+        timeout = true;
+      }
+    }
+
+    if (timeout) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Network timeout: failed to reach server.')),
+      );
+      return;
+    }
+    setState(() {
       _friendRequests = requests;
       _friends = friends;
       if (_friendRequests.isNotEmpty) {
@@ -89,154 +125,9 @@ class _FriendPageState extends State<FriendPage> {
             child: Row(
               spacing: 15,
               children: [
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: IconButton(
-                    onPressed: _loadInitialUserState,
-                    style: IconButton.styleFrom(
-                      foregroundColor: Colors.deepPurple,
-                      backgroundColor: Colors.grey.withAlpha(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    icon: Icon(Icons.refresh, size: 30),
-                  ),
-                ), // Register button if username is not set, otherwise show add friend button
-                _userId.isEmpty
-                    ? SizedBox(
-                        width: 150,
-                        height: 50,
-                        child: IconButton(
-                          onPressed: () async {
-                            String? newUsername = await showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Enter your username'),
-                                  content: TextField(
-                                    onChanged: (value) {
-                                      _username = value;
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: "Username",
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, _username),
-                                      child: Text('Submit'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                            if (newUsername != null && newUsername.isNotEmpty) {
-                              final id = await Internet.fetchUid(newUsername);
-                              setState(() {
-                                _username = newUsername;
-                                _userId = id ?? '';
-                              });
-
-                              if (_userId.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error registering user'),
-                                  ),
-                                );
-                              } else {
-                                await SleepStorage.saveUsername(newUsername);
-                                await SleepStorage.saveUserId(_userId);
-                              }
-                            }
-                          },
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.grey.withAlpha(50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          icon: Text(
-                            "Register",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple,
-                            ),
-                          ),
-                        ),
-                      )
-                    : // Add friend button if user is registered
-                      SizedBox(
-                        width: 150,
-                        height: 50,
-                        child: IconButton(
-                          onPressed: () async {
-                            String? friendUsername = await showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Enter friend\'s name'),
-                                  content: TextField(
-                                    onChanged: (value) {
-                                      _tempFriendName = value;
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: "name",
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(
-                                        context,
-                                        _tempFriendName,
-                                      ),
-                                      child: Text('Submit'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                            if (friendUsername != null &&
-                                friendUsername.isNotEmpty) {
-                              bool? addFriendStates = await Internet.addFriend(
-                                _userId,
-                                friendUsername,
-                              );
-                              if (addFriendStates ?? false) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('friend request sent'),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'error sending friend request',
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.grey.withAlpha(50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          icon: Text(
-                            "Add friend",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.deepPurple,
-                            ),
-                          ),
-                        ),
-                      ),
+                _refreshButton(),
+                // Register button if username is not set, otherwise show add friend button
+                _userId.isEmpty ? _registerButton() : _addFriendButton(),
               ],
             ),
           ),
@@ -267,19 +158,22 @@ class _FriendPageState extends State<FriendPage> {
                   child: Row(
                     children: [
                       Icon(Icons.person, color: Colors.blue, size: 28),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _username,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                      SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _username,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ),
-                      Text(
-                        _userId,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                          Text(
+                            _userId,
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -294,6 +188,141 @@ class _FriendPageState extends State<FriendPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _refreshButton() {
+    return SizedBox(
+      width: 50,
+      height: 50,
+      child: IconButton(
+        onPressed: _loadInitialUserState,
+        style: IconButton.styleFrom(
+          foregroundColor: Colors.deepPurple,
+          backgroundColor: Colors.grey.withAlpha(50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        icon: Icon(Icons.refresh, size: 30),
+      ),
+    );
+  }
+
+  Widget _registerButton() {
+    return SizedBox(
+      width: 150,
+      height: 50,
+      child: IconButton(
+        onPressed: () async {
+          String? newUsername = await showDialog<String>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Enter your username'),
+                content: TextField(
+                  onChanged: (value) {
+                    _username = value;
+                  },
+                  decoration: InputDecoration(hintText: "Username"),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, _username),
+                    child: Text('Submit'),
+                  ),
+                ],
+              );
+            },
+          );
+          if (newUsername != null && newUsername.isNotEmpty) {
+            final id = await Internet.fetchUid(newUsername);
+            setState(() {
+              _username = newUsername;
+              _userId = id ?? '';
+            });
+
+            if (_userId.isEmpty) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Error registering user')));
+            } else {
+              await SleepStorage.saveUsername(newUsername);
+              await SleepStorage.saveUserId(_userId);
+            }
+          }
+        },
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.grey.withAlpha(50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        icon: Text(
+          "Register",
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _addFriendButton() {
+    return SizedBox(
+      width: 150,
+      height: 50,
+      child: IconButton(
+        onPressed: () async {
+          String? friendUsername = await showDialog<String>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Enter friend\'s name'),
+                content: TextField(
+                  onChanged: (value) {
+                    _tempFriendName = value;
+                  },
+                  decoration: InputDecoration(hintText: "name"),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, _tempFriendName),
+                    child: Text('Submit'),
+                  ),
+                ],
+              );
+            },
+          );
+          if (friendUsername != null && friendUsername.isNotEmpty) {
+            bool? addFriendStates = await Internet.addFriend(
+              _userId,
+              friendUsername,
+            );
+            if (addFriendStates ?? false) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('friend request sent')));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('error sending friend request')),
+              );
+            }
+          }
+        },
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.grey.withAlpha(50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        icon: Text(
+          "Add friend",
+          style: const TextStyle(fontSize: 18, color: Colors.deepPurple),
+        ),
       ),
     );
   }
@@ -427,12 +456,12 @@ class _FriendListState extends State<FriendList> {
       children: widget.friends
           .map(
             (friend) => Container(
-              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              margin: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               padding: EdgeInsets.only(
                 left: 12,
                 right: 12,
                 top: 15,
-                bottom: 15,
+                bottom: 40,
               ),
               decoration: BoxDecoration(
                 color: Colors.blue[50],
@@ -443,18 +472,28 @@ class _FriendListState extends State<FriendList> {
                 children: [
                   Icon(Icons.person, color: Colors.blueGrey, size: 28),
                   SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      friend.username,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        friend.username,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ),
-                  Text(
-                    friend.userId,
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        friend.userId,
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Column(
+                        children: [
+                          friend.isAsleep
+                              ? Icon(Icons.dark_mode)
+                              : Icon(Icons.light_mode),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
