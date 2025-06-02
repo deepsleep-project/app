@@ -19,6 +19,180 @@ class _HomePageState extends State<HomePage> {
   String _formattedTime = '';
   bool _isSleeping = false;
 
+  final DateTime _exampleTime = DateTime.utc(2025, 6, 2, 0, 0);
+
+  // Example sleep records for the past 7 days with varied times
+  final List<SleepRecord> _exampleRecords = [
+    // Most recent night
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 0, hours: 2)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).add(Duration(days: 0, hours: 6, minutes: 30)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 0)).toIso8601String(),
+    ),
+    // 1 day ago, short sleep
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 1, hours: 1)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 1, hours: -5)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 1)).toIso8601String(),
+    ),
+    // 2 days ago, late night
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 2, hours: 2, minutes: 30)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 2, hours: -4, minutes: 15)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 2)).toIso8601String(),
+    ),
+    // 3 days ago, long sleep
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 3, hours: 22)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 3, hours: 14)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 3)).toIso8601String(),
+    ),
+    // 4 days ago, nap only
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 4, hours: 23)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 4, hours: 17, minutes: 15)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 4)).toIso8601String(),
+    ),
+    // 5 days ago, normal sleep
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 5, hours: 23, minutes: 30)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 5, hours: 14)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 5)).toIso8601String(),
+    ),
+    // 6 days ago, early sleep
+    SleepRecord(
+      start: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 6, hours: 21, minutes: 45)).toIso8601String(),
+      end: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 6, hours: 11, minutes: 30)).toIso8601String(),
+      date: DateTime.utc(
+        2025,
+        6,
+        2,
+        0,
+        0,
+      ).subtract(Duration(days: 6)).toIso8601String(),
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -301,7 +475,20 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          StatPage(),
+          FutureBuilder<List<SleepRecord>>(
+            future: SleepStorage.loadRecords(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return StatPage(
+                  // Uncomment this line to show charts using real sleep data
+                  // sleepRecords: snapshot.data!,
+                  sleepRecords: _exampleRecords.reversed.toList(),
+                );
+              } else {
+                return Center(child: Text('loading'));
+              }
+            },
+          ),
         ],
       ),
     );
