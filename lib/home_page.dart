@@ -18,6 +18,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String _formattedTime = '';
   bool _isSleeping = false;
+  int _currency = 0;
+  DateTime _start = DateTime(0);
+  DateTime _end = DateTime(0);
 
   final DateTime _exampleTime = DateTime.utc(2025, 6, 2, 0, 0);
 
@@ -264,8 +267,14 @@ class _HomePageState extends State<HomePage> {
   // Load the initial sleep state from storage
   Future<void> _loadInitialSleepState() async {
     bool sleeping = await SleepStorage.loadIsSleeping();
+    int currency = await SleepStorage.loadCurrency();
+    String targetSleepTime = await SleepStorage.loadTargetSleepTime();
+    String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
     setState(() {
       _isSleeping = sleeping;
+      _currency = currency;
+      _start = DateTime.parse(targetSleepTime);
+      _end = DateTime.parse(targetWakeUpTime);
     });
   }
 
@@ -296,6 +305,10 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
+    int goodSleep = _currency + pendingGoodsleep(start, end);
+    
+    await SleepStorage.saveCurrency(goodSleep);
+
     final date = getAdjustedDate(DateTime.parse(start)).toIso8601String();
 
     final records = await SleepStorage.loadRecords();
@@ -305,9 +318,37 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       _isSleeping = false;
+      _currency = goodSleep;
     });
 
     _showSnackBar('wake up, curent time: $_formattedTime');
+  }
+
+  int pendingGoodsleep(String start, String end) {
+    DateTime startA = DateTime.parse(start);
+    DateTime endA = DateTime.parse(end);
+    Duration difference = endA.difference(startA); 
+    if (_end.isBefore(_start)) {
+      _end = _end.add(Duration(days: 1));
+    }
+    DateTime startTime = DateTime(
+      startA.year,
+      startA.month,
+      startA.day,
+      _start.hour,
+      _start.minute,
+      _start.second,
+      _start.millisecond,
+      _start.microsecond,
+    );
+    Duration diff = _end.difference(_start);
+
+    if (startA.isBefore(startTime)){
+      if (diff <= difference) {
+        return 100;
+      }
+    }
+    return 0;
   }
 
   Future<void> _viewHistory() async {
@@ -381,6 +422,25 @@ class _HomePageState extends State<HomePage> {
                   fit: BoxFit.fitHeight,
                   height: screenHeight,
                 ),
+              ),
+              Positioned(
+                top: 70,
+                left: 20,
+                child:Container(
+                  width: 50,  // 宽度
+                  height: 50, // 高度
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 110, 189, 254),          // 背景颜色
+                    shape: BoxShape.circle,      // 设置为圆形
+                  ),
+                  alignment: Alignment.center,   // 居中对齐文字
+                  child: Text(
+                    '\$:${_currency.toString()}',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                )
               ),
               Transform.translate(
                 offset: Offset(0, -screenHeight * 0.20),
