@@ -377,7 +377,7 @@ class _HomePageState extends State<HomePage> {
           child: ListView.builder(
             itemCount: records.length,
             itemBuilder: (context, index) {
-              final r = records[index];
+              final r = records[records.length - index - 1];
               return ListTile(
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
