@@ -192,6 +192,7 @@ class StatPage extends StatelessWidget {
           start: DateTime(2000).toIso8601String(),
           end: DateTime(2000).toIso8601String(),
           date: DateTime(2000).toIso8601String(),
+          sleepRecordState: false
         ),
       );
       double duration = 0;
@@ -300,6 +301,7 @@ class StatPage extends StatelessWidget {
           start: DateTime(2000).toIso8601String(),
           end: DateTime(2000).toIso8601String(),
           date: DateTime(2000).toIso8601String(),
+          sleepRecordState: false
         ),
       );
       double bedTime = 0;

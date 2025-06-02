@@ -49,6 +49,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 0)).toIso8601String(),
+      sleepRecordState: false
     ),
     // 1 day ago, short sleep
     SleepRecord(
@@ -73,6 +74,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 1)).toIso8601String(),
+      sleepRecordState: false
     ),
     // 2 days ago, late night
     SleepRecord(
@@ -97,6 +99,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 2)).toIso8601String(),
+      sleepRecordState: false
     ),
     // 3 days ago, long sleep
     SleepRecord(
@@ -121,6 +124,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 3)).toIso8601String(),
+      sleepRecordState: false
     ),
     // 4 days ago, nap only
     SleepRecord(
@@ -145,6 +149,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 4)).toIso8601String(),
+      sleepRecordState: false
     ),
     // 5 days ago, normal sleep
     SleepRecord(
@@ -169,6 +174,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 5)).toIso8601String(),
+      sleepRecordState: false
     ),
     // 6 days ago, early sleep
     SleepRecord(
@@ -193,6 +199,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 6)).toIso8601String(),
+      sleepRecordState: false
     ),
   ];
 
@@ -305,14 +312,20 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    int goodSleep = _currency + pendingGoodsleep(start, end);
+    bool pending = pendingGoodsleep(start, end);
+    int goodSleep = 0;
+    if (pending) {
+      goodSleep = _currency + 100;
+    } else {
+      goodSleep = _currency;
+    }
     
     await SleepStorage.saveCurrency(goodSleep);
 
     final date = getAdjustedDate(DateTime.parse(start)).toIso8601String();
 
     final records = await SleepStorage.loadRecords();
-    records.add(SleepRecord(start: start, end: end, date: date));
+    records.add(SleepRecord(start: start, end: end, date: date, sleepRecordState: pending));
     await SleepStorage.saveRecords(records);
     await SleepStorage.saveIsSleeping(false);
 
@@ -324,7 +337,7 @@ class _HomePageState extends State<HomePage> {
     _showSnackBar('wake up, curent time: $_formattedTime');
   }
 
-  int pendingGoodsleep(String start, String end) {
+  bool pendingGoodsleep(String start, String end) {
     DateTime startA = DateTime.parse(start);
     DateTime endA = DateTime.parse(end);
     Duration difference = endA.difference(startA); 
@@ -343,12 +356,14 @@ class _HomePageState extends State<HomePage> {
     );
     Duration diff = _end.difference(_start);
 
+    print(difference);
+    print(diff);
     if (startA.isBefore(startTime)){
       if (diff <= difference) {
-        return 100;
+        return true;
       }
     }
-    return 0;
+    return false;
   }
 
   Future<void> _viewHistory() async {
@@ -368,7 +383,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Date: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date))}',
+                      'Date: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date))} State: ${r.sleepRecordState ? "Good" : "Bad"}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
