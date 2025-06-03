@@ -13,7 +13,7 @@ class SleepRecord {
   }
 
   factory SleepRecord.fromMap(Map<String, dynamic> map) {
-    return SleepRecord(start: map['start'], end: map['end'],  date: map['date']);
+    return SleepRecord(start: map['start'], end: map['end'], date: map['date']);
   }
 }
 
@@ -49,7 +49,8 @@ class SleepStorage {
     await _storage.ready;
     await _storage.setItem('TargetSleepTime', value);
   }
-    static Future<String> loadTargetWakeUpTime() async {
+
+  static Future<String> loadTargetWakeUpTime() async {
     await _storage.ready;
     return _storage.getItem('TargetWakeUpTime') ?? "2025-01-01T07:00:00.000000";
   }
@@ -84,9 +85,9 @@ class SleepStorage {
     return _storage.setItem('userId', id);
   }
 
-  static Future<String?> loadUserId() async {
+  static Future<String> loadUserId() async {
     await _storage.ready;
-    return _storage.getItem('userId') as String?;
+    return _storage.getItem('userId') as String? ?? '';
   }
 
   static Future<List<SleepRecord>> loadRecords() async {

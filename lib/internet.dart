@@ -3,7 +3,7 @@ import 'package:drp_19/friend_request.dart';
 import 'package:http/http.dart' as http;
 import 'friend.dart';
 
-final String _serverURL = 'http://146.169.26.180:3000';
+final String _serverURL = 'http://146.169.26.221:3000';
 
 abstract class Internet {
   // Register a new user and return their UID

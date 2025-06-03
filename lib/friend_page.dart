@@ -25,7 +25,7 @@ class _FriendPageState extends State<FriendPage> {
 
   final List<FriendRecord> _exampleFriends = [
     FriendRecord(username: 'Michael', userId: '25632', isAsleep: false),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: false),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true),
   ];
 
   @override
@@ -89,9 +89,13 @@ class _FriendPageState extends State<FriendPage> {
       _friendRequests = requests;
       _friends = friends;
       if (_friendRequests.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('You have new friend requests.')),
+        );
+      } else {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('You have new friend requests')));
+        ).showSnackBar(SnackBar(content: Text('Successfully refreshed.')));
       }
     });
   }
@@ -461,7 +465,7 @@ class _FriendListState extends State<FriendList> {
                 left: 12,
                 right: 12,
                 top: 15,
-                bottom: 40,
+                bottom: 20,
               ),
               decoration: BoxDecoration(
                 color: Colors.blue[50],
@@ -486,11 +490,12 @@ class _FriendListState extends State<FriendList> {
                         friend.userId,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
+                      SizedBox(height: 10),
                       Column(
                         children: [
                           friend.isAsleep
-                              ? Icon(Icons.dark_mode)
-                              : Icon(Icons.light_mode),
+                              ? Icon(Icons.dark_mode, color: Colors.indigo)
+                              : Icon(Icons.light_mode, color: Colors.orange),
                         ],
                       ),
                     ],
