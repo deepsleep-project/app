@@ -292,14 +292,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _uploadAsleep() async {
     bool timeout = false;
-    if (_isSleeping) {
+    if (_isSleeping && _userId.isNotEmpty) {
       await Internet.setAsleep(_userId).timeout(
         const Duration(seconds: 2),
         onTimeout: () {
           timeout = true;
         },
       );
-    } else {
+    } else if (_userId.isNotEmpty) {
       await Internet.setAwake(_userId).timeout(
         const Duration(seconds: 2),
         onTimeout: () {
@@ -478,19 +478,32 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Positioned(
-                top: 70,
-                left: 20,
-                child: Container(
-                  width: 50, // 宽度
-                  height: 50, // 高度
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 110, 189, 254), // 背景颜色
-                    shape: BoxShape.circle, // 设置为圆形
-                  ),
-                  alignment: Alignment.center, // 居中对齐文字
-                  child: Text(
-                    _currency.toString(),
-                    style: TextStyle(color: Colors.white),
+                top: screenHeight * 0.07,
+                left: screenHeight * 0.03,
+                child: SizedBox(
+                  width: 100,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withAlpha(200),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.bolt, size: 25),
+                        Text(
+                          _currency.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -619,7 +632,14 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(30),
           ),
         ),
-        child: Text(text, style: const TextStyle(fontSize: 18)),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.deepPurple,
+          ),
+        ),
       ),
     );
   }

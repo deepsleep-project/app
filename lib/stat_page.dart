@@ -19,10 +19,11 @@ class StatPage extends StatelessWidget {
     return Stack(
       children: [
         Transform.translate(
-          offset: Offset(0, screenHeight * 0.1),
+          offset: Offset(0, screenHeight * 0.08),
           child: Column(
-            spacing: 30,
             children: [
+              DayWeekStat(sleepRecords: sleepRecords),
+              SizedBox(height: 20),
               Text(
                 'Sleep duration this week',
                 style: TextStyle(
@@ -44,7 +45,7 @@ class StatPage extends StatelessWidget {
                   child: LineChart(sleepDurationChart()),
                 ),
               ),
-
+              SizedBox(height: 20),
               Text(
                 'Bed time this week',
                 style: TextStyle(
@@ -192,7 +193,7 @@ class StatPage extends StatelessWidget {
           start: DateTime(2000).toIso8601String(),
           end: DateTime(2000).toIso8601String(),
           date: DateTime(2000).toIso8601String(),
-          sleepRecordState: false
+          sleepRecordState: false,
         ),
       );
       double duration = 0;
@@ -301,7 +302,7 @@ class StatPage extends StatelessWidget {
           start: DateTime(2000).toIso8601String(),
           end: DateTime(2000).toIso8601String(),
           date: DateTime(2000).toIso8601String(),
-          sleepRecordState: false
+          sleepRecordState: false,
         ),
       );
       double bedTime = 0;
@@ -381,6 +382,203 @@ class StatPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class DayWeekStat extends StatelessWidget {
+  final List<SleepRecord> sleepRecords;
+
+  const DayWeekStat({super.key, required this.sleepRecords});
+
+  @override
+  Widget build(BuildContext context) {
+    final lastNightRecord = sleepRecords.isNotEmpty
+        ? sleepRecords.reduce(
+            (a, b) => DateTime.parse(a.start).isAfter(DateTime.parse(b.start))
+                ? a
+                : b,
+          )
+        : null;
+
+    String formatBedTime(DateTime? dateTime) {
+      if (dateTime == null) return '--:--';
+      int hour = dateTime.hour;
+      int minute = dateTime.minute;
+      String suffix = hour >= 12 ? 'pm' : 'am';
+      int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $suffix';
+    }
+
+    String formatDuration(double hours) {
+      int h = hours.floor();
+      int m = ((hours - h) * 60).round();
+      return '${h}h ${m.toString().padLeft(2, '0')}m';
+    }
+
+    // Get last night's bed time and duration
+    DateTime? lastNightBedTime = lastNightRecord != null
+        ? DateTime.parse(lastNightRecord.start)
+        : null;
+    double? lastNightDuration;
+    if (lastNightRecord != null) {
+      final start = DateTime.parse(lastNightRecord.start);
+      final end = DateTime.parse(lastNightRecord.end);
+      lastNightDuration = end.difference(start).inMinutes / 60.0;
+      if (lastNightDuration < 0) lastNightDuration = 0;
+    }
+
+    // Get last 7 days' records (sorted, most recent first)
+    List<SleepRecord> last7Records =
+        sleepRecords
+            .where((r) => DateTime.parse(r.start).isBefore(DateTime.now()))
+            .toList()
+          ..sort(
+            (a, b) =>
+                DateTime.parse(b.start).compareTo(DateTime.parse(a.start)),
+          );
+    List<SleepRecord> last7 = last7Records.take(7).toList();
+
+    // Bed times for last 7 days
+    List<DateTime> last7BedTimes = last7
+        .map((r) => DateTime.parse(r.start))
+        .toList();
+
+    // Durations for last 7 days
+    List<double> last7Durations = last7
+        .map((r) {
+          final start = DateTime.parse(r.start);
+          final end = DateTime.parse(r.end);
+          double d = end.difference(start).inMinutes / 60.0;
+          return d < 0 ? 0 : d;
+        })
+        .toList()
+        .cast<double>();
+
+    // Calculate average bed time
+    DateTime? avgBedTime;
+    if (last7BedTimes.isNotEmpty) {
+      int totalMinutes = last7BedTimes.fold(0, (sum, dt) {
+        int hour = dt.hour;
+        if (hour < 12) hour += 24;
+        return sum + hour * 60 + dt.minute;
+      });
+      int avgMinutes = (totalMinutes / last7BedTimes.length).round();
+      int avgHour = avgMinutes ~/ 60;
+      int avgMinute = avgMinutes % 60;
+      if (avgHour >= 24) avgHour -= 24;
+      avgBedTime = DateTime(0, 1, 1, avgHour, avgMinute);
+    }
+
+    // Calculate average duration
+    double avgDuration = last7Durations.isNotEmpty
+        ? last7Durations.reduce((a, b) => a + b) / last7Durations.length
+        : 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Last Night',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    formatBedTime(lastNightBedTime),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal[700],
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    lastNightDuration != null
+                        ? formatDuration(lastNightDuration)
+                        : '--h --m',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(width: 18),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    '7-Day Avg',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    formatBedTime(avgBedTime),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal[700],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    last7Durations.isNotEmpty
+                        ? formatDuration(avgDuration)
+                        : '--h --m',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
