@@ -5,15 +5,31 @@ class SleepRecord {
   final String start;
   final String end;
   final String date;
+  final bool sleepRecordState;
 
-  SleepRecord({required this.start, required this.end, required this.date});
+  SleepRecord({
+    required this.start,
+    required this.end,
+    required this.date,
+    required this.sleepRecordState,
+  });
 
   Map<String, dynamic> toMap() {
-    return {'start': start, 'end': end, 'date': date};
+    return {
+      'start': start,
+      'end': end,
+      'date': date,
+      'sleepRecordState': sleepRecordState,
+    };
   }
 
   factory SleepRecord.fromMap(Map<String, dynamic> map) {
-    return SleepRecord(start: map['start'], end: map['end'], date: map['date']);
+    return SleepRecord(
+      start: map['start'],
+      end: map['end'],
+      date: map['date'],
+      sleepRecordState: map['sleepRecordState'],
+    );
   }
 }
 
