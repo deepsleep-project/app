@@ -262,13 +262,13 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
                 ],
               ),
               SleepTimeBar(startHour: startHour, startMinute: startMinute),
+              WakeupTimeBar(endHour: endHour, endMinute: endMinute),
               SleepDuration(
                 startHour: startHour,
                 startMinute: startMinute,
                 endHour: endHour,
                 endMinute: endMinute,
               ),
-              SizedBox(height: screenHeight * 0.25),
             ],
           ),
         ),
@@ -289,10 +289,6 @@ class SleepTimeBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Show the time to go to sleep in a styled bar
-    String formattedTime =
-        '${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')}';
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 60.0),
       child: Column(
@@ -306,8 +302,9 @@ class SleepTimeBar extends StatelessWidget {
           SizedBox(height: 10),
           LayoutBuilder(
             builder: (context, constraints) {
-              int adjustedStartHour = startHour % 24 + 24;
-              double startTime = (startHour * 60 + startMinute) / 60;
+              int adjustedStartHour = startHour;
+              if (adjustedStartHour < 12) adjustedStartHour += 24;
+              double startTime = (adjustedStartHour * 60 + startMinute) / 60;
 
               // Bar settings
               double minTime = 20.0;
@@ -384,7 +381,7 @@ class SleepTimeBar extends StatelessWidget {
                   SizedBox(height: 6),
                   if (startTime < 20 || startTime > 24)
                     Text(
-                      "Unhealthy bed time",
+                      "Try to set up a healthier bedtime",
                       style: TextStyle(
                         color: Colors.redAccent,
                         fontSize: 16,
@@ -393,7 +390,135 @@ class SleepTimeBar extends StatelessWidget {
                     )
                   else
                     Text(
-                      "Healthy bed time",
+                      "Good job on going to bed early!",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WakeupTimeBar extends StatelessWidget {
+  final int endHour;
+  final int endMinute;
+
+  const WakeupTimeBar({
+    super.key,
+    required this.endHour,
+    required this.endMinute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 60.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Wake Up Time",
+            style: TextStyle(fontSize: 20),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              double endTime = (endHour * 60 + endMinute) / 60;
+
+              // Bar settings
+              double minTime = 5.0;
+              double maxTime = 13.0;
+              double barWidth = constraints.maxWidth;
+              double pos = ((endTime - minTime) / (maxTime - minTime)).clamp(
+                0.0,
+                1.0,
+              );
+
+              // Healthy range: 6:30am(6.5) - 10:30am(10.5)
+              double healthyStart = (6.5 - minTime) / (maxTime - minTime);
+              double healthyEnd = (10.5 - minTime) / (maxTime - minTime);
+
+              Color barColor = (endTime >= 6.5 && endTime <= 10.5)
+                  ? Colors.green
+                  : Colors.redAccent;
+
+              return Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      // Background bar
+                      Container(
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                      ),
+                      // Healthy range highlight
+                      Positioned(
+                        left: barWidth * healthyStart,
+                        child: Container(
+                          height: 18,
+                          width: barWidth * (healthyEnd - healthyStart),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                        ),
+                      ),
+                      // User's duration marker
+                      Positioned(
+                        left: barWidth * pos - 8,
+                        child: Container(
+                          width: 22,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: barColor,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.black26, width: 1),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.arrow_drop_up,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("05:00", style: TextStyle(fontSize: 14)),
+                      Text("13:00", style: TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                  SizedBox(height: 6),
+                  if (endTime < 6.5 || endTime > 10.5)
+                    Text(
+                      "Try to set up a healthier wake-up time",
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  else
+                    Text(
+                      "Good job on going to bed early!",
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 16,
@@ -525,7 +650,7 @@ class SleepDuration extends StatelessWidget {
                   ),
                   if (durationHours < 7 || durationHours > 10)
                     Text(
-                      "Unhealthy sleep duration",
+                      "Aim for 7–10 hours for better health",
                       style: TextStyle(
                         color: Colors.redAccent,
                         fontSize: 16,
@@ -534,7 +659,7 @@ class SleepDuration extends StatelessWidget {
                     )
                   else
                     Text(
-                      "Healthy sleep duration",
+                      "Great job! Keep up your healthy sleep!",
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 16,

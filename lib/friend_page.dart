@@ -173,10 +173,15 @@ class _FriendPageState extends State<FriendPage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Text(
-                            _userId,
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
+                          if (_userId.isNotEmpty) ...[
+                            Text(
+                              _userId,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ],
