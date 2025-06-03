@@ -1,8 +1,10 @@
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
+import 'package:drp_19/notification.dart';
 import 'package:drp_19/setting_page.dart';
 import 'package:drp_19/stat_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'tent_page.dart';
@@ -13,7 +15,7 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -24,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
 
-  final DateTime _exampleTime = DateTime.utc(2025, 6, 2, 0, 0);
+  // final DateTime _exampleTime = DateTime.utc(2025, 6, 2, 0, 0);
 
   // Example sleep records for the past 7 days with varied times
   final List<SleepRecord> _exampleRecords = [
@@ -215,6 +217,25 @@ class _HomePageState extends State<HomePage> {
     });
     _loadInitialSleepState();
     _uploadAsleep();
+
+    AppNotification.instance
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+    AppNotification.instance
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()!
+        .requestNotificationsPermission();
+
+    AppNotification.instance.show(
+      0,
+      'plain title',
+      'plain body',
+      AppNotification.details,
+      payload: 'item x',
+    );
   }
 
   // Update and format the current time
@@ -407,7 +428,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _viewHistory() async {
     final records = await SleepStorage.loadRecords();
+    if (!context.mounted) return;
     showDialog(
+      // ignore: use_build_context_synchronously
       context: context,
       builder: (context) => AlertDialog(
         title: Text('History'),

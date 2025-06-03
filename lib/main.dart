@@ -1,29 +1,28 @@
 import 'package:drp_19/home_page.dart';
+import 'package:drp_19/notification.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+import 'package:workmanager/workmanager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  final DarwinInitializationSettings initializationSettingsDarwin =
-      DarwinInitializationSettings();
-
-  final InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsDarwin,
+  await AppNotification.instance.initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('logo'),
+    ),
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
-  }
+  Workmanager().initialize(
+    AppNotification.callbackDispatcher,
+    isInDebugMode: kDebugMode,
+  );
+  Workmanager().registerPeriodicTask(
+    "notification-daemon",
+    "null",
+    frequency: Duration(minutes: 15), // is capped at 15 min
+  );
+
   runApp(const MyApp());
 }
 
