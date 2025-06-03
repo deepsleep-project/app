@@ -7,14 +7,29 @@ class SleepRecord {
   final String date;
   final bool sleepRecordState;
 
-  SleepRecord({required this.start, required this.end, required this.date, required this.sleepRecordState});
+  SleepRecord({
+    required this.start,
+    required this.end,
+    required this.date,
+    required this.sleepRecordState,
+  });
 
   Map<String, dynamic> toMap() {
-    return {'start': start, 'end': end, 'date': date, 'sleepRecordState': sleepRecordState};
+    return {
+      'start': start,
+      'end': end,
+      'date': date,
+      'sleepRecordState': sleepRecordState,
+    };
   }
 
   factory SleepRecord.fromMap(Map<String, dynamic> map) {
-    return SleepRecord(start: map['start'], end: map['end'],  date: map['date'], sleepRecordState: map['sleepRecordState']);
+    return SleepRecord(
+      start: map['start'],
+      end: map['end'],
+      date: map['date'],
+      sleepRecordState: map['sleepRecordState'],
+    );
   }
 }
 
@@ -50,7 +65,8 @@ class SleepStorage {
     await _storage.ready;
     await _storage.setItem('TargetSleepTime', value);
   }
-    static Future<String> loadTargetWakeUpTime() async {
+
+  static Future<String> loadTargetWakeUpTime() async {
     await _storage.ready;
     return _storage.getItem('TargetWakeUpTime') ?? "2025-01-01T07:00:00.000000";
   }
@@ -85,9 +101,9 @@ class SleepStorage {
     return _storage.setItem('userId', id);
   }
 
-  static Future<String?> loadUserId() async {
+  static Future<String> loadUserId() async {
     await _storage.ready;
-    return _storage.getItem('userId') as String?;
+    return _storage.getItem('userId') as String? ?? '';
   }
 
   static Future<List<SleepRecord>> loadRecords() async {

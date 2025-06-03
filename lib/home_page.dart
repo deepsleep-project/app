@@ -1,4 +1,5 @@
 import 'package:drp_19/friend_page.dart';
+import 'package:drp_19/internet.dart';
 import 'package:drp_19/setting_page.dart';
 import 'package:drp_19/stat_page.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String _userId = '';
   String _formattedTime = '';
   bool _isSleeping = false;
   int _currency = 0;
@@ -49,7 +51,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 0)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
     // 1 day ago, short sleep
     SleepRecord(
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 1)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
     // 2 days ago, late night
     SleepRecord(
@@ -99,7 +101,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 2)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
     // 3 days ago, long sleep
     SleepRecord(
@@ -124,7 +126,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 3)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
     // 4 days ago, nap only
     SleepRecord(
@@ -149,7 +151,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 4)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
     // 5 days ago, normal sleep
     SleepRecord(
@@ -174,7 +176,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 5)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
     // 6 days ago, early sleep
     SleepRecord(
@@ -199,7 +201,7 @@ class _HomePageState extends State<HomePage> {
         0,
         0,
       ).subtract(Duration(days: 6)).toIso8601String(),
-      sleepRecordState: false
+      sleepRecordState: false,
     ),
   ];
 
@@ -212,6 +214,7 @@ class _HomePageState extends State<HomePage> {
       _updateTime();
     });
     _loadInitialSleepState();
+    _uploadAsleep();
   }
 
   // Update and format the current time
@@ -273,16 +276,42 @@ class _HomePageState extends State<HomePage> {
 
   // Load the initial sleep state from storage
   Future<void> _loadInitialSleepState() async {
+    String id = await SleepStorage.loadUserId();
     bool sleeping = await SleepStorage.loadIsSleeping();
     int currency = await SleepStorage.loadCurrency();
     String targetSleepTime = await SleepStorage.loadTargetSleepTime();
     String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
     setState(() {
+      _userId = id;
       _isSleeping = sleeping;
       _currency = currency;
       _start = DateTime.parse(targetSleepTime);
       _end = DateTime.parse(targetWakeUpTime);
     });
+  }
+
+  Future<void> _uploadAsleep() async {
+    bool timeout = false;
+    if (_isSleeping) {
+      await Internet.setAsleep(_userId).timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          timeout = true;
+        },
+      );
+    } else {
+      await Internet.setAwake(_userId).timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          timeout = true;
+        },
+      );
+    }
+
+    if (timeout) {
+      _showSnackBar('Network timeout: failed to reach server.');
+      return;
+    }
   }
 
   Future<void> _startSleep() async {
@@ -296,6 +325,9 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isSleeping = true;
     });
+
+    _uploadAsleep();
+
     _showSnackBar('start sleep, current time: $_formattedTime');
   }
 
@@ -319,13 +351,20 @@ class _HomePageState extends State<HomePage> {
     } else {
       goodSleep = _currency;
     }
-    
+
     await SleepStorage.saveCurrency(goodSleep);
 
     final date = getAdjustedDate(DateTime.parse(start)).toIso8601String();
 
     final records = await SleepStorage.loadRecords();
-    records.add(SleepRecord(start: start, end: end, date: date, sleepRecordState: pending));
+    records.add(
+      SleepRecord(
+        start: start,
+        end: end,
+        date: date,
+        sleepRecordState: pending,
+      ),
+    );
     await SleepStorage.saveRecords(records);
     await SleepStorage.saveIsSleeping(false);
 
@@ -334,13 +373,15 @@ class _HomePageState extends State<HomePage> {
       _currency = goodSleep;
     });
 
+    _uploadAsleep();
+
     _showSnackBar('wake up, curent time: $_formattedTime');
   }
 
   bool pendingGoodsleep(String start, String end) {
     DateTime startA = DateTime.parse(start);
     DateTime endA = DateTime.parse(end);
-    Duration difference = endA.difference(startA); 
+    Duration difference = endA.difference(startA);
     if (_end.isBefore(_start)) {
       _end = _end.add(Duration(days: 1));
     }
@@ -356,9 +397,7 @@ class _HomePageState extends State<HomePage> {
     );
     Duration diff = _end.difference(_start);
 
-    print(difference);
-    print(diff);
-    if (startA.isBefore(startTime)){
+    if (startA.isBefore(startTime)) {
       if (diff <= difference) {
         return true;
       }
@@ -441,21 +480,19 @@ class _HomePageState extends State<HomePage> {
               Positioned(
                 top: 70,
                 left: 20,
-                child:Container(
-                  width: 50,  // 宽度
+                child: Container(
+                  width: 50, // 宽度
                   height: 50, // 高度
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 110, 189, 254),          // 背景颜色
-                    shape: BoxShape.circle,      // 设置为圆形
+                    color: const Color.fromARGB(255, 110, 189, 254), // 背景颜色
+                    shape: BoxShape.circle, // 设置为圆形
                   ),
-                  alignment: Alignment.center,   // 居中对齐文字
+                  alignment: Alignment.center, // 居中对齐文字
                   child: Text(
-                    '\$:${_currency.toString()}',
-                    style: TextStyle(
-                      color: Colors.white
-                    ),
+                    _currency.toString(),
+                    style: TextStyle(color: Colors.white),
                   ),
-                )
+                ),
               ),
               Transform.translate(
                 offset: Offset(0, -screenHeight * 0.20),
