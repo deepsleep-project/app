@@ -10,11 +10,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentStart="true"
-    android:layout_alignParentLeft="true"
     android:layout_marginStart="8dp"
-    android:layout_marginLeft="8dp"
     android:background="@android:color/white"
-    android:text="Title"
     android:textSize="20sp"
     android:textStyle="bold" />
 
@@ -24,12 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/headline_title"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="4dp"
         android:background="@android:color/white"
-        android:text="Title"
         android:textSize="16sp" />
 
 </RelativeLayout>
