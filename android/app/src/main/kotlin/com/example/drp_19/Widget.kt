@@ -29,7 +29,7 @@ class Widget : AppWidgetProvider() {
             // the button.
             val views: RemoteViews = RemoteViews(
                 context.packageName,
-                R.layout.widget
+                R.layout.widget_awake
             ).apply {
                 setOnClickPendingIntent(R.id.widget_container, pendingIntent)
             }
