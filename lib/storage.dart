@@ -28,7 +28,7 @@ class SleepRecord {
       start: map['start'],
       end: map['end'],
       date: map['date'],
-      sleepRecordState: map['sleepRecordState'],
+      sleepRecordState: map['sleepRecordState'] ?? false,
     );
   }
 }
