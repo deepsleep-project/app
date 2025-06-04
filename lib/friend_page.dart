@@ -3,6 +3,7 @@ import 'package:drp_19/storage.dart';
 import 'package:flutter/material.dart';
 import 'internet.dart';
 import 'friend.dart';
+import 'package:drp_19/storage.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -24,8 +25,12 @@ class _FriendPageState extends State<FriendPage> {
   ];
 
   final List<FriendRecord> _exampleFriends = [
-    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 5),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 8),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 9),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 16),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 2),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 7),
   ];
 
   @override
@@ -84,6 +89,9 @@ class _FriendPageState extends State<FriendPage> {
         SnackBar(content: Text('Network timeout: failed to reach server.')),
       );
       return;
+    } else {
+      
+      sortFriend(friends);
     }
     setState(() {
       _friendRequests = requests;
@@ -98,6 +106,21 @@ class _FriendPageState extends State<FriendPage> {
         ).showSnackBar(SnackBar(content: Text('Successfully refreshed.')));
       }
     });
+  }
+
+  void sortFriend(List<FriendRecord> list) async {
+    bool isasleep = await SleepStorage.loadIsSleeping();
+    int strike1 = await SleepStorage.loadStreak();
+    list.add(FriendRecord(username: _username, userId: _userId, isAsleep: isasleep, strike: strike1));
+    for (int i = 0; i < list.length; i++) {
+      for (int ii = 0; ii < list.length; ii++){
+        if (list[i].strike>list[ii].strike){
+          FriendRecord temp = list[i];
+          list[i] = list[ii];
+          list[ii] = temp;
+        }
+      }
+    }
   }
 
   @override
@@ -463,53 +486,70 @@ class _FriendListState extends State<FriendList> {
   Widget build(BuildContext context) {
     return Column(
       children: widget.friends
-          .map(
-            (friend) => Container(
-              margin: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              padding: EdgeInsets.only(
-                left: 12,
-                right: 12,
-                top: 15,
-                bottom: 20,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-              ),
-              child: Row(
+    .asMap()
+    .entries
+    .map(
+      (entry) {
+        final index = entry.key;
+        final friend = entry.value;
+
+        Color bgColor;
+        Icon rankIcon;
+
+        if (index == 0) {
+          bgColor = Colors.amber[200]!;
+          rankIcon = Icon(Icons.emoji_events, color: Colors.amber, size: 28);
+        } else if (index == 1) {
+          bgColor = Colors.grey[300]!;
+          rankIcon = Icon(Icons.emoji_events, color: Colors.grey, size: 28);
+        } else if (index == 2) {
+          bgColor = Colors.brown[300]!;
+          rankIcon = Icon(Icons.emoji_events, color: Colors.brown, size: 28);
+        } else {
+          bgColor = Colors.blue[50]!;
+          rankIcon = Icon(Icons.person, color: Colors.blueGrey, size: 28);
+        }
+
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: EdgeInsets.only(left: 12, right: 12, top: 15, bottom: 20),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+          ),
+          child: Row(
+            children: [
+              rankIcon,
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.person, color: Colors.blueGrey, size: 28),
-                  SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        friend.username,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        friend.userId,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      SizedBox(height: 10),
-                      Column(
-                        children: [
-                          friend.isAsleep
-                              ? Icon(Icons.dark_mode, color: Colors.indigo)
-                              : Icon(Icons.light_mode, color: Colors.orange),
-                        ],
-                      ),
-                    ],
+                  Text(
+                    friend.username,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
+                  Text(
+                    'strike: ${friend.strike}',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    friend.userId,
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  SizedBox(height: 10),
+                  friend.isAsleep
+                      ? Icon(Icons.dark_mode, color: Colors.indigo)
+                      : Icon(Icons.light_mode, color: Colors.orange),
                 ],
               ),
-            ),
-          )
-          .toList(),
+            ],
+          ),
+        );
+      },
+    )
+    .toList(),
+
     );
   }
 }

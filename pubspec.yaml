@@ -35,8 +35,8 @@ dependencies:
   intl: ^0.18.1
   http: ^1.4.0
   fl_chart: ^1.0.0
-  workmanager: ^0.6.0
   flutter_local_notifications: ^19.2.1
+  alarm: ^5.1.4
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +60,7 @@ flutter:
     - assets/sunset.png
     - assets/night.png
     - assets/tent.png
+    - assets/alarm.mp3
 
   # To add assets to your application, add an assets section, like this:
   # assets:

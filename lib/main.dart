@@ -1,12 +1,12 @@
+import 'package:alarm/alarm.dart';
 import 'package:drp_19/home_page.dart';
 import 'package:drp_19/notification.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Alarm.init();
 
   const DarwinInitializationSettings initializationSettingsIOS =
       DarwinInitializationSettings();

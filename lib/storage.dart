@@ -55,7 +55,15 @@ class SleepStorage {
     await _storage.ready;
     await _storage.setItem('currency', value);
   }
+  static Future<int> loadStreak() async {
+    await _storage.ready;
+    return _storage.getItem('streak') ?? 0;
+  }
 
+  static Future<void> saveStreak(int value) async {
+    await _storage.ready;
+    await _storage.setItem('streak', value);
+  }
   static Future<String> loadTargetSleepTime() async {
     await _storage.ready;
     return _storage.getItem('TargetSleepTime') ?? "2025-01-01T23:00:00.000000";

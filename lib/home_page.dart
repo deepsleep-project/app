@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
       _userId = id;
       _isSleeping = sleeping;
       _currency = currency;
-      _sleepConsistantly = _calculateStrike(record);
+      _sleepConsistantly = _calculateStrike(_exampleRecords);
       _start = DateTime.parse(targetSleepTime);
       _end = DateTime.parse(targetWakeUpTime);
     });
@@ -200,6 +200,8 @@ class _HomePageState extends State<HomePage> {
       }
       strike += 1;
     }
+    SleepStorage.saveStreak(strike);
+    Internet.setstrike(_userId, strike);
     return strike;
   }
 
@@ -319,7 +321,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _viewHistory() async {
-    final records = await SleepStorage.loadRecords();
+    final records = _exampleRecords; //await SleepStorage.loadRecords();
     if (!context.mounted) return;
     showDialog(
       // ignore: use_build_context_synchronously
