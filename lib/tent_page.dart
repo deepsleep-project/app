@@ -4,7 +4,7 @@ class TentPage extends StatefulWidget {
   const TentPage({super.key});
 
   @override
-  _TentPageState createState() => _TentPageState();
+  State<TentPage> createState() => _TentPageState();
 }
 
 class _TentPageState extends State<TentPage> {

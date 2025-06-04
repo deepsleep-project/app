@@ -1,117 +1,105 @@
 package com.example.drp_19
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.FileObserver
+import android.util.Log
 import android.widget.RemoteViews
-import androidx.annotation.RequiresApi
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.File
-
-fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
-    when (val value = this[it]) {
-        is JSONArray -> {
-            val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
-            JSONObject(map).toMap().values.toList()
-        }
-
-        is JSONObject -> value.toMap()
-        JSONObject.NULL -> null
-        else -> value
-    }
-}
-
 
 class Widget : AppWidgetProvider() {
     companion object {
         const val ACTION_TOGGLE = "com.example.drp_19.TOGGLE_SLEEP"
-        const val PATH = "storage-61f76cb0-842b-4318-a644-e245f50a0b5a.json"
+        const val ACTION_REFRESH = "com.example.drp_19.REFRESH_WIDGET"
+        const val ACTION_REFRESH_APP = "com.example.drp_19.REFRESH_APP"
+        private const val PREFS_NAME = "FlutterSharedPreferences"
 
-        @SuppressLint("StaticFieldLeak")
-        private var fileObserver: WidgetFileObserver? = null
+        private fun refreshAndBindAction(
+            context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray
+        ) {
+            val isSleeping = getSleepingState(context)
+            Log.d("Widget", "刷新小部件，状态: ${if (isSleeping) "睡眠" else "唤醒"}")
 
+            appWidgetIds.forEach { appWidgetId ->
+                val views = RemoteViews(
+                    context.packageName,
+                    if (isSleeping) R.layout.widget_sleeping else R.layout.widget_awake
+                )
 
-        private fun refreshAndBindAction(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-            val views = RemoteViews(
-                context.packageName, if (getSleepingState(context)) R.layout.widget_sleeping else R.layout.widget_awake
-            )
-
-            // bind action to ui
-            views.setOnClickPendingIntent(
-                R.id.btn_toggle, PendingIntent.getBroadcast(context, 0, Intent(context, Widget::class.java).apply {
+                // 绑定点击事件
+                val toggleIntent = Intent(context, Widget::class.java).apply {
                     action = ACTION_TOGGLE
-                }, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-            )
+                }
+                val pendingToggle = PendingIntent.getBroadcast(
+                    context,
+                    appWidgetId,
+                    toggleIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
 
-            appWidgetManager.updateAppWidget(appWidgetIds, views)
+                views.setOnClickPendingIntent(R.id.btn_toggle, pendingToggle)
+
+                // 更新特定小部件实例
+                appWidgetManager.updateAppWidget(appWidgetId, views)
+            }
         }
 
-        // 获取状态
         private fun getSleepingState(context: Context): Boolean {
-            val basePath = context.applicationInfo.dataDir
-            val file = File("$basePath/$PATH")
-            if (file.exists()) {
-                val map = JSONObject(file.readText()).toMap()
-                return map["isSleeping"] as Boolean
-            } else {
-                return false
-            }
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean("flutter.isSleeping", false)
         }
 
-        // 保存状态
         private fun saveSleepingState(context: Context, sleeping: Boolean) {
-            val basePath = context.applicationInfo.dataDir
-            val file = File("$basePath/$PATH")
-            val map =
-                (if (file.exists()) JSONObject(file.readText()).toMap() else mapOf<String, String>()).toMutableMap()
-            map["isSleeping"] = sleeping
-            file.writeText(JSONObject(map).toString())
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    class WidgetFileObserver(
-        private val context: Context, private val file: File
-    ) : FileObserver(file, CLOSE_WRITE) {
-        override fun onEvent(event: Int, path: String?) {
-            if (event == CLOSE_WRITE) {
-                val appWidgetManager = AppWidgetManager.getInstance(context)
-                val appWidgetIds = appWidgetManager.getAppWidgetIds(ComponentName(context, Widget::class.java))
-                refreshAndBindAction(context, appWidgetManager, appWidgetIds)
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            with(prefs.edit()) {
+                putBoolean("flutter.isSleeping", sleeping)
+                commit()
             }
+            context.sendBroadcast(Intent(ACTION_REFRESH_APP).apply {
+                `package` = "com.example.drp_19"
+                putExtra("status", sleeping) // 添加额外参数
+            })
+            Log.d("Widget", "发送状态变化广播: $sleeping")
+            Log.d("Widget", "保存睡眠状态: $sleeping")
         }
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        if (fileObserver == null) {
-            val basePath = context.applicationInfo.dataDir
-            val file = File("$basePath/$PATH")
-            fileObserver = WidgetFileObserver(context, file)
-            fileObserver?.startWatching()
-        }
+    override fun onUpdate(
+        context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray
+    ) {
+        Log.d("Widget", "onUpdate 被调用")
         refreshAndBindAction(context, appWidgetManager, appWidgetIds)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        // filter out our intent
-        if (intent.action == ACTION_TOGGLE) {
-            saveSleepingState(context, !getSleepingState(context))
-        }
+        Log.d("Widget", "接收到的广播动作: ${intent.action}")
 
-        // refresh ui
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val appWidgetIds = appWidgetManager.getAppWidgetIds(ComponentName(context, Widget::class.java))
-        refreshAndBindAction(context, appWidgetManager, appWidgetIds)
+        when (intent.action) {
+            ACTION_TOGGLE -> {
+                Log.d("Widget", "切换睡眠状态")
+                saveSleepingState(context, !getSleepingState(context))
+                refreshAllWidgets(context)
+            }
+
+            ACTION_REFRESH -> {
+                Log.d("Widget", "收到刷新请求")
+                refreshAllWidgets(context)
+            }
+
+            else -> {
+                Log.d("Widget", "其他广播: ${intent.action}")
+                super.onReceive(context, intent)
+            }
+        }
     }
 
+    private fun refreshAllWidgets(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        val component = ComponentName(context, Widget::class.java)
+        val ids = manager.getAppWidgetIds(component)
+        Log.d("Widget", "刷新所有小部件，找到 ${ids.size} 个实例")
+        refreshAndBindAction(context, manager, ids)
+    }
 }

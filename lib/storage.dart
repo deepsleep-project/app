@@ -1,5 +1,7 @@
 import 'dart:async';
-import 'package:localstorage/localstorage.dart';
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SleepRecord {
   final String start;
@@ -34,100 +36,90 @@ class SleepRecord {
 }
 
 class SleepStorage {
-  static final LocalStorage _storage = LocalStorage('sleep_data');
+  static Future<SharedPreferences> get pref async =>
+      await SharedPreferences.getInstance();
 
   static Future<bool> loadIsSleeping() async {
-    await _storage.ready;
-    return _storage.getItem('isSleeping') == true;
+    return (await pref).getBool('isSleeping') ?? false;
   }
 
   static Future<void> saveIsSleeping(bool value) async {
-    await _storage.ready;
-    await _storage.setItem('isSleeping', value);
+    await (await pref).setBool('isSleeping', value);
   }
 
   static Future<int> loadCurrency() async {
-    await _storage.ready;
-    return _storage.getItem('currency') ?? 0;
+    return (await pref).getInt('currency') ?? 0;
   }
 
   static Future<void> saveCurrency(int value) async {
-    await _storage.ready;
-    await _storage.setItem('currency', value);
+    await (await pref).setInt('currency', value);
   }
+
   static Future<int> loadStreak() async {
-    await _storage.ready;
-    return _storage.getItem('streak') ?? 0;
+    return (await pref).getInt('streak') ?? 0;
   }
 
   static Future<void> saveStreak(int value) async {
-    await _storage.ready;
-    await _storage.setItem('streak', value);
+    await (await pref).setInt('streak', value);
   }
+
   static Future<String> loadTargetSleepTime() async {
-    await _storage.ready;
-    return _storage.getItem('TargetSleepTime') ?? "2025-01-01T23:00:00.000000";
+    return (await pref).getString('TargetSleepTime') ??
+        "2025-01-01T23:00:00.000000";
   }
 
   static Future<void> saveTargetSleepTime(String value) async {
-    await _storage.ready;
-    await _storage.setItem('TargetSleepTime', value);
+    await (await pref).setString('TargetSleepTime', value);
   }
 
   static Future<String> loadTargetWakeUpTime() async {
-    await _storage.ready;
-    return _storage.getItem('TargetWakeUpTime') ?? "2025-01-01T07:00:00.000000";
+    return (await pref).getString('TargetWakeUpTime') ??
+        "2025-01-01T07:00:00.000000";
   }
 
   static Future<void> saveTargetWakeUpTime(String value) async {
-    await _storage.ready;
-    await _storage.setItem('TargetWakeUpTime', value);
+    await (await pref).setString('TargetWakeUpTime', value);
   }
 
   static Future<String?> loadStartTime() async {
-    await _storage.ready;
-    return _storage.getItem('startTime')?.toString();
+    return (await pref).getString('startTime')?.toString();
   }
 
   static Future<void> saveStartTime(String time) async {
-    await _storage.ready;
-    await _storage.setItem('startTime', time);
+    await (await pref).setString('startTime', time);
   }
 
   static Future<void> saveUsername(String username) async {
-    await _storage.ready;
-    await _storage.setItem('username', username);
+    await (await pref).setString('username', username);
   }
 
   static Future<String?> loadUsername() async {
-    await _storage.ready;
-    return _storage.getItem('username')?.toString();
+    return (await pref).getString('username')?.toString();
   }
 
   static Future<void> saveUserId(String id) async {
-    await _storage.ready;
-    return _storage.setItem('userId', id);
+    (await pref).setString('userId', id);
   }
 
   static Future<String> loadUserId() async {
-    await _storage.ready;
-    return _storage.getItem('userId') as String? ?? '';
+    return (await pref).getString('userId') ?? '';
   }
 
   static Future<List<SleepRecord>> loadRecords() async {
-    await _storage.ready;
-    final list = _storage.getItem('records');
-    if (list is List) {
-      return list
-          .map((item) => SleepRecord.fromMap(Map<String, dynamic>.from(item)))
-          .toList();
-    }
-    return [];
+    final list = (await pref).getStringList('records');
+    return list == null
+        ? []
+        : list
+              .map(
+                (item) => SleepRecord.fromMap(
+                  Map<String, dynamic>.from(jsonDecode(item)),
+                ),
+              )
+              .toList();
   }
 
   static Future<void> saveRecords(List<SleepRecord> records) async {
-    await _storage.ready;
-    final data = records.map((r) => r.toMap()).toList();
-    await _storage.setItem('records', data);
+    final data = records.map((r) => jsonEncode(r.toMap())).toList();
+    await (await pref).setStringList('records', data);
   }
 }
