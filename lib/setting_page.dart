@@ -1,3 +1,4 @@
+import 'package:drp_19/notificate.dart';
 import 'package:flutter/material.dart';
 import 'storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -64,9 +65,14 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
   @override
   void initState() {
     super.initState();
-    _loadInitialTargetState();
+  _loadInitialTargetState();
+  _initAndShowNotification();
   }
-
+  Future<void> _initAndShowNotification() async {
+    final notifier = Notificate();
+    await notifier.initNotification();
+    await notifier.showNotification(id: 1, title: 'wow', body: 'w');
+  }
   void _showStartTime() {
     _showTimePickerDialog(
       initialHour: startHour,

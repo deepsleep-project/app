@@ -1,8 +1,10 @@
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
+import 'package:drp_19/notification.dart';
 import 'package:drp_19/setting_page.dart';
 import 'package:drp_19/stat_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'tent_page.dart';
@@ -13,7 +15,7 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -21,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   String _formattedTime = '';
   bool _isSleeping = false;
   int _currency = 0;
+  int _sleepConsistantly = 0;
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
 
@@ -88,6 +91,25 @@ class _HomePageState extends State<HomePage> {
     });
     _loadInitialSleepState();
     _uploadAsleep();
+
+    AppNotification.instance
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+    AppNotification.instance
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()!
+        .requestNotificationsPermission();
+
+    AppNotification.instance.show(
+      0,
+      'plain title',
+      'plain body',
+      AppNotification.details,
+      payload: 'item x',
+    );
   }
 
   // Update and format the current time
@@ -154,13 +176,26 @@ class _HomePageState extends State<HomePage> {
     int currency = await SleepStorage.loadCurrency();
     String targetSleepTime = await SleepStorage.loadTargetSleepTime();
     String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
+    List<SleepRecord> record = await SleepStorage.loadRecords();
     setState(() {
       _userId = id;
       _isSleeping = sleeping;
       _currency = currency;
+      _sleepConsistantly = _calculateStrike(record);
       _start = DateTime.parse(targetSleepTime);
       _end = DateTime.parse(targetWakeUpTime);
     });
+  }
+
+  int _calculateStrike(List<SleepRecord> records) {
+    int strike = 0;
+    for (int i = 0; i < records.length; i++) {
+      if (!records[i].sleepRecordState) {
+        break;
+      }
+      strike += 1;
+    }
+    return strike;
   }
 
   Future<void> _uploadAsleep() async {
@@ -280,7 +315,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _viewHistory() async {
     final records = await SleepStorage.loadRecords();
+    if (!context.mounted) return;
     showDialog(
+      // ignore: use_build_context_synchronously
       context: context,
       builder: (context) => AlertDialog(
         title: Text('History'),
@@ -369,6 +406,36 @@ class _HomePageState extends State<HomePage> {
                         Icon(Icons.bolt, size: 25),
                         Text(
                           _currency.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: screenHeight * 0.07,
+                left: screenHeight * 0.15,
+                child: SizedBox(
+                  width: 100,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withAlpha(200),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_fire_department, size: 25),
+                        Text(
+                          _sleepConsistantly.toString(),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
