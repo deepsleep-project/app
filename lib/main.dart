@@ -7,16 +7,22 @@ import 'package:workmanager/workmanager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppNotification.instance.initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('logo'),
-    ),
+
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: AndroidInitializationSettings('logo'),
+    iOS: initializationSettingsIOS,
   );
+
+  await AppNotification.instance.initialize(initializationSettings);
 
   Workmanager().initialize(
     AppNotification.callbackDispatcher,
     isInDebugMode: kDebugMode,
   );
+
   Workmanager().registerPeriodicTask(
     "notification-daemon",
     "null",

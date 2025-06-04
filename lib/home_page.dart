@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
 import 'package:drp_19/notification.dart';
@@ -92,16 +94,19 @@ class _HomePageState extends State<HomePage> {
     _loadInitialSleepState();
     _uploadAsleep();
 
-    AppNotification.instance
-        .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin
-        >()
-        ?.requestPermissions(alert: true, badge: true, sound: true);
-    AppNotification.instance
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()!
-        .requestNotificationsPermission();
+    if (Platform.isIOS) {
+      AppNotification.instance
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+    } else if (Platform.isAndroid) {
+      AppNotification.instance
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
+    }
 
     AppNotification.instance.show(
       0,
@@ -381,11 +386,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               Align(
                 alignment: Alignment.bottomRight,
-                child: Image.asset(
-                  'assets/day.png',
-                  fit: BoxFit.fitHeight,
-                  height: screenHeight,
-                ),
+                child: DayNightImage(screenHeight: screenHeight),
               ),
               Positioned(
                 top: screenHeight * 0.07,
@@ -448,7 +449,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Transform.translate(
-                offset: Offset(0, -screenHeight * 0.20),
+                offset: Offset(0, -screenHeight * 0.19),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -582,5 +583,27 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+}
+
+class DayNightImage extends StatelessWidget {
+  final double screenHeight;
+
+  const DayNightImage({super.key, required this.screenHeight});
+
+  @override
+  Widget build(BuildContext context) {
+    final hour = DateTime.now().hour; // day: 6am - 6pm
+    String imagePath = 'assets/day.png';
+
+    if (hour < 6 || hour >= 20) {
+      imagePath = 'assets/night.png';
+    } else if (hour >= 6 && hour <= 9) {
+      imagePath = 'assets/sunrise.png';
+    } else if (hour >= 17 && hour < 20) {
+      imagePath = 'assets/sunset.png';
+    }
+
+    return Image.asset(imagePath, fit: BoxFit.fitHeight, height: screenHeight);
   }
 }
