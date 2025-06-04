@@ -29,19 +29,18 @@
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"/>
     </LinearLayout>
-
     <Button
-            android:id="@+id/btn_wake"
+            android:id="@+id/btn_toggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="8dp"
-            android:text="Wake"
-            android:textSize="12sp"
+            android:layout_marginBottom="16dp"
+            android:text="Start Sleeping"
+            android:textSize="16sp"
             android:textColor="#FFFFFF"
-            android:background="#000000"
+            android:background="@drawable/button_bg"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="4dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"/>
+            android:paddingVertical="16dp"
+            android:minWidth="64dp"
+            android:minHeight="64dp"/>
 </FrameLayout>

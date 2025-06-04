@@ -7,6 +7,8 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="drp19.widget.WAKE_BUTTON" />
+                <action android:name="drp19.widget.SLEEP_BUTTON" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
