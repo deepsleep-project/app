@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
+import java.net.HttpURLConnection
+import java.net.URL
 
 class Widget : AppWidgetProvider() {
     companion object {
@@ -15,6 +17,39 @@ class Widget : AppWidgetProvider() {
         const val ACTION_REFRESH = "com.example.drp_19.REFRESH_WIDGET"
         const val ACTION_REFRESH_APP = "com.example.drp_19.REFRESH_APP"
         private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val SERVER_URL = "http://146.169.26.221:3000"
+
+        private fun postSleepStatus(uid: String, isSleeping: Boolean) {
+            Thread {
+                Log.d("Widget", "向服务器更新状态: $isSleeping")
+                var connection: HttpURLConnection? = null
+                try {
+                    val dest = if (isSleeping) "wake" else "sleep"
+                    val url = URL("$SERVER_URL/$dest")
+                    connection = url.openConnection() as HttpURLConnection
+                    connection.requestMethod = "POST"
+                    connection.setRequestProperty("Content-Type", "application/json")
+                    connection.doOutput = true
+
+                    // 写入JSON数据
+                    val outputStream = connection.outputStream
+                    outputStream.write("{\"uid\":\"$uid\"}".toByteArray())
+                    outputStream.flush()
+                    outputStream.close()
+
+                    val responseCode = connection.responseCode
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        Log.d("HttpUtil", "HTTP请求成功")
+                    } else {
+                        Log.e("HttpUtil", "HTTP请求失败: $responseCode")
+                    }
+                } catch (e: Exception) {
+                    Log.e("HttpUtil", "HTTP请求异常: $e")
+                } finally {
+                    connection?.disconnect()
+                }
+            }.start()
+        }
 
         private fun refreshAndBindAction(
             context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray
@@ -51,12 +86,18 @@ class Widget : AppWidgetProvider() {
             return prefs.getBoolean("flutter.isSleeping", false)
         }
 
+        private fun getUID(context: Context): String {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            return prefs.getString("flutter.userId", "") ?: ""
+        }
+
         private fun saveSleepingState(context: Context, sleeping: Boolean) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             with(prefs.edit()) {
                 putBoolean("flutter.isSleeping", sleeping)
                 commit()
             }
+            postSleepStatus(getUID(context), sleeping)
             context.sendBroadcast(Intent(ACTION_REFRESH_APP).apply {
                 `package` = "com.example.drp_19"
                 putExtra("status", sleeping) // 添加额外参数
