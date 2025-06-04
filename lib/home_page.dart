@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
+import 'package:drp_19/notification.dart';
 import 'package:drp_19/setting_page.dart';
 import 'package:drp_19/stat_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'tent_page.dart';
@@ -13,7 +17,7 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -21,187 +25,61 @@ class _HomePageState extends State<HomePage> {
   String _formattedTime = '';
   bool _isSleeping = false;
   int _currency = 0;
+  int _sleepConsistantly = 0;
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
 
-  final DateTime _exampleTime = DateTime.utc(2025, 6, 2, 0, 0);
-
-  // Example sleep records for the past 7 days with varied times
+  // Example sleep records with varied times
   final List<SleepRecord> _exampleRecords = [
-    // Most recent night
+    // Wednesday, May 28, 2025
     SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 0, hours: 2)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).add(Duration(days: 0, hours: 6, minutes: 30)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 0)).toIso8601String(),
+      start: DateTime.utc(2025, 5, 28, 21, 27).toIso8601String(),
+      end: DateTime.utc(2025, 5, 29, 7, 18).toIso8601String(),
+      date: DateTime.utc(2025, 5, 28, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Thursday, May 29, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 5, 29, 22, 45).toIso8601String(),
+      end: DateTime.utc(2025, 5, 30, 7, 54).toIso8601String(),
+      date: DateTime.utc(2025, 5, 29, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+
+    // Friday, May 30, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 5, 30, 23, 09).toIso8601String(),
+      end: DateTime.utc(2025, 5, 31, 8, 12).toIso8601String(),
+      date: DateTime.utc(2025, 5, 30, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Saturday, May 31, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 6, 1, 1, 27).toIso8601String(),
+      end: DateTime.utc(2025, 6, 1, 7, 36).toIso8601String(),
+      date: DateTime.utc(2025, 5, 31, 0, 0).toIso8601String(),
       sleepRecordState: false,
     ),
-    // 1 day ago, short sleep
+    // Sunday, June 1, 2025
     SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 1, hours: 1)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 1, hours: -5)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 1)).toIso8601String(),
-      sleepRecordState: false,
+      start: DateTime.utc(2025, 6, 1, 21, 58).toIso8601String(),
+      end: DateTime.utc(2025, 6, 2, 6, 43).toIso8601String(),
+      date: DateTime.utc(2025, 6, 1, 0, 0).toIso8601String(),
+      sleepRecordState: true,
     ),
-    // 2 days ago, late night
+    // Monday, June 2, 2025
     SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 2, hours: 2, minutes: 30)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 2, hours: -4, minutes: 15)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 2)).toIso8601String(),
-      sleepRecordState: false,
+      start: DateTime.utc(2025, 6, 2, 23, 02).toIso8601String(),
+      end: DateTime.utc(2025, 6, 3, 7, 00).toIso8601String(),
+      date: DateTime.utc(2025, 6, 2, 0, 0).toIso8601String(),
+      sleepRecordState: true,
     ),
-    // 3 days ago, long sleep
+    // Tuesday, June 3, 2025
     SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 3, hours: 22)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 3, hours: 14)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 3)).toIso8601String(),
-      sleepRecordState: false,
-    ),
-    // 4 days ago, nap only
-    SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 4, hours: 23)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 4, hours: 17, minutes: 15)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 4)).toIso8601String(),
-      sleepRecordState: false,
-    ),
-    // 5 days ago, normal sleep
-    SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 5, hours: 23, minutes: 30)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 5, hours: 14)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 5)).toIso8601String(),
-      sleepRecordState: false,
-    ),
-    // 6 days ago, early sleep
-    SleepRecord(
-      start: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 6, hours: 21, minutes: 45)).toIso8601String(),
-      end: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 6, hours: 11, minutes: 30)).toIso8601String(),
-      date: DateTime.utc(
-        2025,
-        6,
-        2,
-        0,
-        0,
-      ).subtract(Duration(days: 6)).toIso8601String(),
-      sleepRecordState: false,
+      start: DateTime.utc(2025, 6, 3, 22, 52).toIso8601String(),
+      end: DateTime.utc(2025, 6, 4, 7, 20).toIso8601String(),
+      date: DateTime.utc(2025, 6, 3, 0, 0).toIso8601String(),
+      sleepRecordState: true,
     ),
   ];
 
@@ -215,6 +93,28 @@ class _HomePageState extends State<HomePage> {
     });
     _loadInitialSleepState();
     _uploadAsleep();
+
+    if (Platform.isIOS) {
+      AppNotification.instance
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+    } else if (Platform.isAndroid) {
+      AppNotification.instance
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
+    }
+
+    AppNotification.instance.show(
+      0,
+      'plain title',
+      'plain body',
+      AppNotification.details,
+      payload: 'item x',
+    );
   }
 
   // Update and format the current time
@@ -281,13 +181,28 @@ class _HomePageState extends State<HomePage> {
     int currency = await SleepStorage.loadCurrency();
     String targetSleepTime = await SleepStorage.loadTargetSleepTime();
     String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
+    List<SleepRecord> record = await SleepStorage.loadRecords();
     setState(() {
       _userId = id;
       _isSleeping = sleeping;
       _currency = currency;
+      _sleepConsistantly = _calculateStrike(_exampleRecords);
       _start = DateTime.parse(targetSleepTime);
       _end = DateTime.parse(targetWakeUpTime);
     });
+  }
+
+  int _calculateStrike(List<SleepRecord> records) {
+    int strike = 0;
+    for (int i = 0; i < records.length; i++) {
+      if (!records[i].sleepRecordState) {
+        break;
+      }
+      strike += 1;
+    }
+    SleepStorage.saveStreak(strike);
+    Internet.setstrike(_userId, strike);
+    return strike;
   }
 
   Future<void> _uploadAsleep() async {
@@ -406,8 +321,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _viewHistory() async {
-    final records = await SleepStorage.loadRecords();
+    final records = _exampleRecords; //await SleepStorage.loadRecords();
+    if (!context.mounted) return;
     showDialog(
+      // ignore: use_build_context_synchronously
       context: context,
       builder: (context) => AlertDialog(
         title: Text('History'),
@@ -471,11 +388,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               Align(
                 alignment: Alignment.bottomRight,
-                child: Image.asset(
-                  'assets/day.png',
-                  fit: BoxFit.fitHeight,
-                  height: screenHeight,
-                ),
+                child: DayNightImage(screenHeight: screenHeight),
               ),
               Positioned(
                 top: screenHeight * 0.07,
@@ -507,8 +420,38 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
+              Positioned(
+                top: screenHeight * 0.07,
+                left: screenHeight * 0.15,
+                child: SizedBox(
+                  width: 100,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withAlpha(200),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_fire_department, size: 25),
+                        Text(
+                          _sleepConsistantly.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               Transform.translate(
-                offset: Offset(0, -screenHeight * 0.20),
+                offset: Offset(0, -screenHeight * 0.19),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -607,7 +550,7 @@ class _HomePageState extends State<HomePage> {
                 return StatPage(
                   // Uncomment this line to show charts using real sleep data
                   // sleepRecords: snapshot.data!,
-                  sleepRecords: _exampleRecords.reversed.toList(),
+                  sleepRecords: _exampleRecords,
                 );
               } else {
                 return Center(child: Text('loading'));
@@ -642,5 +585,27 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+}
+
+class DayNightImage extends StatelessWidget {
+  final double screenHeight;
+
+  const DayNightImage({super.key, required this.screenHeight});
+
+  @override
+  Widget build(BuildContext context) {
+    final hour = DateTime.now().hour; // day: 6am - 6pm
+    String imagePath = 'assets/day.png';
+
+    if (hour < 6 || hour >= 20) {
+      imagePath = 'assets/night.png';
+    } else if (hour >= 6 && hour <= 9) {
+      imagePath = 'assets/sunrise.png';
+    } else if (hour >= 17 && hour < 20) {
+      imagePath = 'assets/sunset.png';
+    }
+
+    return Image.asset(imagePath, fit: BoxFit.fitHeight, height: screenHeight);
   }
 }

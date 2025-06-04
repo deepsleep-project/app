@@ -1,7 +1,23 @@
+import 'package:alarm/alarm.dart';
 import 'package:drp_19/home_page.dart';
+import 'package:drp_19/notification.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Alarm.init();
+
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: AndroidInitializationSettings('logo'),
+    iOS: initializationSettingsIOS,
+  );
+
+  await AppNotification.instance.initialize(initializationSettings);
+
   runApp(const MyApp());
 }
 

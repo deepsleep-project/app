@@ -1,7 +1,8 @@
+import 'package:drp_19/notificate.dart';
 import 'package:flutter/material.dart';
 import 'storage.dart';
 import 'package:flutter/cupertino.dart';
-
+import 'notification.dart';
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
 
@@ -64,9 +65,8 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
   @override
   void initState() {
     super.initState();
-    _loadInitialTargetState();
+  _loadInitialTargetState();
   }
-
   void _showStartTime() {
     _showTimePickerDialog(
       initialHour: startHour,
@@ -93,7 +93,7 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
     );
   }
 
-  void _saveStartTime() {
+  void _saveStartTime(){
     String time = DateTime(
       2025,
       0,
@@ -102,6 +102,7 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
       startMinute,
     ).toIso8601String();
     print(time);
+    AppNotification.publishSleepReminders(startHour, startMinute);
     SleepStorage.saveTargetSleepTime(time);
   }
 
