@@ -90,8 +90,9 @@ abstract class Internet {
       for (int i = 0; i < ids.length; i++) {
         String name = await fetchFriendName(ids[i]) ?? '';
         bool isAsleep = await getAsleep(ids[i]);
+        int strike = await strikefetch(ids[i]);
         result.add(
-          FriendRecord(username: name, userId: ids[i], isAsleep: isAsleep),
+          FriendRecord(username: name, userId: ids[i], isAsleep: isAsleep, strike: strike),
         );
       }
       return result;
@@ -122,6 +123,25 @@ abstract class Internet {
     } else {
       return false;
     }
+  }
+
+    static Future<int> strikefetch(String friendUID) async {
+    final url = Uri.parse('$_serverURL/Streakset/$friendUID');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)["getStreak"] as int;
+    } else {
+      return 0;
+    }
+  }
+
+  static Future<void> setstrike(String friendUID, int strike) async {
+    final url = Uri.parse('$_serverURL/Streakset');
+    await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': friendUID, 'accept': strike}),
+    );
   }
 
   static Future<void> setAsleep(String userUID) async {

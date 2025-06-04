@@ -24,8 +24,12 @@ class _FriendPageState extends State<FriendPage> {
   ];
 
   final List<FriendRecord> _exampleFriends = [
-    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 5),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 8),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 9),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 16),
+    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 2),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 7),
   ];
 
   @override
