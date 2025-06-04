@@ -187,6 +187,7 @@ class _HomePageState extends State<HomePage> {
       }
       strike += 1;
     }
+    SleepStorage.saveStreak(strike);
     Internet.setstrike(_userId,strike);
     return strike;
   }

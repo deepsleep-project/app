@@ -2,12 +2,12 @@ class FriendRecord {
   final String username;
   final String userId;
   bool isAsleep;
-  int strike = 0;
+  int strike;
 
   FriendRecord({
     required this.username,
     required this.userId,
     required this.isAsleep,
-    required strike,
+    required this.strike,
   });
 }
