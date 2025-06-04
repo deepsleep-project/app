@@ -18,17 +18,6 @@ Future<void> main() async {
 
   await AppNotification.instance.initialize(initializationSettings);
 
-  Workmanager().initialize(
-    AppNotification.callbackDispatcher,
-    isInDebugMode: kDebugMode,
-  );
-
-  Workmanager().registerPeriodicTask(
-    "notification-daemon",
-    "null",
-    frequency: Duration(minutes: 15), // is capped at 15 min
-  );
-
   runApp(const MyApp());
 }
 
