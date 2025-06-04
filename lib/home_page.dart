@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
 import 'package:drp_19/notification.dart';
 import 'package:drp_19/setting_page.dart';
 import 'package:drp_19/stat_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Intent;
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
@@ -92,7 +94,8 @@ class _HomePageState extends State<HomePage> {
       _updateTime();
     });
     _loadInitialSleepState();
-    _uploadAsleep();
+    _notifyServer();
+    _listenForAndroidIntent();
 
     if (Platform.isIOS) {
       AppNotification.instance
@@ -181,7 +184,7 @@ class _HomePageState extends State<HomePage> {
     int currency = await SleepStorage.loadCurrency();
     String targetSleepTime = await SleepStorage.loadTargetSleepTime();
     String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
-    List<SleepRecord> record = await SleepStorage.loadRecords();
+    // List<SleepRecord> record = await SleepStorage.loadRecords();
     setState(() {
       _userId = id;
       _isSleeping = sleeping;
@@ -205,7 +208,7 @@ class _HomePageState extends State<HomePage> {
     return strike;
   }
 
-  Future<void> _uploadAsleep() async {
+  Future<void> _notifyServer() async {
     bool timeout = false;
     if (_isSleeping && _userId.isNotEmpty) {
       await Internet.setAsleep(_userId).timeout(
@@ -241,7 +244,8 @@ class _HomePageState extends State<HomePage> {
       _isSleeping = true;
     });
 
-    _uploadAsleep();
+    _notifyServer();
+    _notifyDesktopWidget();
 
     _showSnackBar('start sleep, current time: $_formattedTime');
   }
@@ -288,9 +292,20 @@ class _HomePageState extends State<HomePage> {
       _currency = goodSleep;
     });
 
-    _uploadAsleep();
+    _notifyServer();
+    _notifyDesktopWidget();
 
     _showSnackBar('wake up, curent time: $_formattedTime');
+  }
+
+  Future<void> _notifyDesktopWidget() async {
+    if (Platform.isAndroid) {
+      final AndroidIntent intent = AndroidIntent(
+        action: 'com.example.drp_19.REFRESH_WIDGET',
+        package: 'com.example.drp_19',
+      );
+      await intent.sendBroadcast();
+    }
   }
 
   bool pendingGoodsleep(String start, String end) {
@@ -585,6 +600,23 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _listenForAndroidIntent() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+    const channel = MethodChannel('com.example.drp_19/channel');
+
+    channel.setMethodCallHandler((call) async {
+      if (call.method == 'onRefresh') {
+        print("✅ 通过原生通道收到刷新广播");
+        print("newStatus: ${call.arguments as bool}");
+        setState(() => _isSleeping = call.arguments as bool);
+      }
+      return Future.value(null);
+    });
+    print("正在监听广播");
   }
 }
 
