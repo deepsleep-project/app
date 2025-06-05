@@ -22,7 +22,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
   String _userId = '';
   String _formattedTime = '';
   bool _isSleeping = false;
@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
   int _sleepConsistantly = 0;
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   // Example sleep records with varied times
   final List<SleepRecord> _exampleRecords = [
@@ -88,6 +90,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _controller.forward();
     _updateTime();
     // Update the time every second
     Timer.periodic(Duration(seconds: 1), (timer) {
@@ -120,6 +128,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   // Update and format the current time
   void _updateTime() {
     final now = DateTime.now();
@@ -139,22 +153,6 @@ class _HomePageState extends State<HomePage> {
     return PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 500),
       pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-    );
-  }
-
-  // Navigate to tent_page
-  void _goToDarkHomePage() {
-    Navigator.of(context).push(_createFadeRouteToDarkHomePage());
-  }
-
-  // Create a fade transition route to the tent_page
-  Route _createFadeRouteToDarkHomePage() {
-    return PageRouteBuilder(
-      transitionDuration: Duration(milliseconds: 500),
-      pageBuilder: (context, animation, secondaryAnimation) => Home_page_dark(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
@@ -404,268 +402,260 @@ class _HomePageState extends State<HomePage> {
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
-
-  @override
+@override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     if (_isSleeping) {
-      return Scaffold(
-        body: PageView(
-          scrollDirection: Axis.vertical,
-          physics: _isSleeping
-              ? const NeverScrollableScrollPhysics()
-              : const ClampingScrollPhysics(),
-          children: [
-            Stack(
-              fit: StackFit.expand,
-              children: [
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Image.asset(
-                    'assets/night.png',
-                    fit: BoxFit.fitHeight,
-                    height: screenHeight,
-                  ),
-                ),
-                Transform.translate(
-                  offset: Offset(0, -screenHeight * 0.19),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _formattedTime,
-                          style: TextStyle(
-                            fontFamily: "Digital",
-                            letterSpacing: -2,
-                            fontSize: 80,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        _buildButton('Get up', _endSleep),
-                        const SizedBox(height: 80),
-                      ],
-                    ),
-                  ),
-                ),
-                // Invisible button to navigate to tent_page
-                Positioned(
-                  bottom: screenHeight * 0.2,
-                  left: screenHeight * 0.08,
-                  right: screenHeight * 0.1,
-                  height: screenHeight * 0.19,
-                  child: GestureDetector(
-                    onTap: _goToTentPage,
-                    child: Container(color: Colors.transparent),
-                  ),
-                ),
-              ],
-            ),
-            FutureBuilder<List<SleepRecord>>(
-              future: SleepStorage.loadRecords(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return StatPage(
-                    // Uncomment this line to show charts using real sleep data
-                    sleepRecords: snapshot.data!,
-                    // sleepRecords: _exampleRecords,
-                  );
-                } else {
-                  return Center(child: Text('loading'));
-                }
-              },
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Scaffold(
-        body: PageView(
-          scrollDirection: Axis.vertical,
-          physics: const ClampingScrollPhysics(),
-          children: [
-            Stack(
-              fit: StackFit.expand,
-              children: [
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: DayNightImage(screenHeight: screenHeight),
-                ),
-                Positioned(
-                  top: screenHeight * 0.07,
-                  left: screenHeight * 0.03,
-                  child: SizedBox(
-                    width: 100,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white.withAlpha(200),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.bolt, size: 25),
-                          Text(
-                            _currency.toString(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.deepPurple,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.07,
-                  left: screenHeight * 0.15,
-                  child: SizedBox(
-                    width: 100,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white.withAlpha(200),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.local_fire_department, size: 25),
-                          Text(
-                            _sleepConsistantly.toString(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.deepPurple,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Transform.translate(
-                  offset: Offset(0, -screenHeight * 0.19),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _formattedTime,
-                          style: TextStyle(
-                            fontFamily: "Digital",
-                            letterSpacing: -2,
-                            fontSize: 80,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (!_isSleeping)
-                          _buildButton('Go to bed', _startSleep)
-                        else
-                          _buildButton('Get up', _endSleep),
-                        const SizedBox(height: 20),
-                        _buildButton('Sleep history', _viewHistory),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Toolbar friends icon to navigate to friends page
-                Positioned(
-                  top: screenHeight * 0.07,
-                  right: screenHeight * 0.03,
+      return FadeTransition(
+        opacity: _animation,
+        child: Scaffold(
+          body: PageView(
+        scrollDirection: Axis.vertical,
+        physics: _isSleeping ? const NeverScrollableScrollPhysics() : const ClampingScrollPhysics(),
+        children: [
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Image.asset('assets/night.png', fit: BoxFit.fitHeight, height: screenHeight),
+              ),
+              Transform.translate(
+                offset: Offset(0, -screenHeight * 0.19),
+                child: Center(
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      GestureDetector(
-                        onTap: _goToFriendPage,
-                        child: Icon(
-                          Icons.people,
-                          size: 40,
-                          color: Colors.white.withAlpha(230),
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.01),
-                      GestureDetector(
-                        onTap: _goToSettingPage,
-                        child: Icon(
-                          Icons.settings,
-                          size: 40,
-                          color: Colors.white.withAlpha(230),
+                      Text(
+                        _formattedTime,
+                        style: TextStyle(
+                          fontFamily: "Digital",
+                          letterSpacing: -2,
+                          fontSize: 80,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 10),
-                      _buildButton('Go to bed', _goToDarkHomePage),
+                      _buildButton('Get up', _endSleep),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+              ),
+              // Invisible button to navigate to tent_page
+              Positioned(
+                bottom: screenHeight * 0.2,
+                left: screenHeight * 0.08,
+                right: screenHeight * 0.1,
+                height: screenHeight * 0.19,
+                child: GestureDetector(
+                  onTap: _goToTentPage,
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+            ],
+          ),
+          FutureBuilder<List<SleepRecord>>(
+            future: SleepStorage.loadRecords(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return StatPage(
+                  // Uncomment this line to show charts using real sleep data
+                  // sleepRecords: snapshot.data!,
+                  sleepRecords: _exampleRecords,
+                );
+              } else {
+                return Center(child: Text('loading'));
+              }
+            },
+          ),
+        ],
+      ),
+    )
+      );
+    } else {
+      return Scaffold(
+      body: PageView(
+        scrollDirection: Axis.vertical,
+        physics: const ClampingScrollPhysics(),
+        children: [
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: DayNightImage(screenHeight: screenHeight),
+              ),
+              Positioned(
+                top: screenHeight * 0.07,
+                left: screenHeight * 0.03,
+                child: SizedBox(
+                  width: 100,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withAlpha(200),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.bolt, size: 25),
+                        Text(
+                          _currency.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: screenHeight * 0.07,
+                left: screenHeight * 0.15,
+                child: SizedBox(
+                  width: 100,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withAlpha(200),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_fire_department, size: 25),
+                        Text(
+                          _sleepConsistantly.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(0, -screenHeight * 0.19),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formattedTime,
+                        style: TextStyle(
+                          fontFamily: "Digital",
+                          letterSpacing: -2,
+                          fontSize: 80,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (!_isSleeping)
+                        _buildButton('Go to bed', _startSleep)
+                      else
+                        _buildButton('Get up', _endSleep),
                       const SizedBox(height: 20),
                       _buildButton('Sleep history', _viewHistory),
                     ],
                   ),
                 ),
+              ),
 
-                // Invisible button to navigate to tent_page
-                Positioned(
-                  bottom: screenHeight * 0.2,
-                  left: screenHeight * 0.08,
-                  right: screenHeight * 0.1,
-                  height: screenHeight * 0.19,
-                  child: GestureDetector(
-                    onTap: _goToTentPage,
-                    child: Container(color: Colors.transparent),
-                  ),
-                ),
-
-                // Text "statistics" at bottom
-                Positioned(
-                  bottom: screenHeight * 0.03,
-                  left: screenHeight * 0.1,
-                  right: screenHeight * 0.1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'statistics',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white.withAlpha(230),
-                        ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down,
+              // Toolbar friends icon to navigate to friends page
+              Positioned(
+                top: screenHeight * 0.07,
+                right: screenHeight * 0.03,
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _goToFriendPage,
+                      child: Icon(
+                        Icons.people,
+                        size: 40,
                         color: Colors.white.withAlpha(230),
-                        size: 50,
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    GestureDetector(
+                      onTap: _goToSettingPage,
+                      child: Icon(
+                        Icons.settings,
+                        size: 40,
+                        color: Colors.white.withAlpha(230),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            FutureBuilder<List<SleepRecord>>(
-              future: SleepStorage.loadRecords(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return StatPage(
-                    // Uncomment this line to show charts using real sleep data
-                    sleepRecords: snapshot.data!,
-                    // sleepRecords: _exampleRecords,
-                  );
-                } else {
-                  return Center(child: Text('loading'));
-                }
-              },
-            ),
-          ],
-        ),
-      );
+              ),
+
+              // Invisible button to navigate to tent_page
+              Positioned(
+                bottom: screenHeight * 0.2,
+                left: screenHeight * 0.08,
+                right: screenHeight * 0.1,
+                height: screenHeight * 0.19,
+                child: GestureDetector(
+                  onTap: _goToTentPage,
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+
+              // Text "statistics" at bottom
+              Positioned(
+                bottom: screenHeight * 0.03,
+                left: screenHeight * 0.1,
+                right: screenHeight * 0.1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'statistics',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withAlpha(230),
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white.withAlpha(230),
+                      size: 50,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          FutureBuilder<List<SleepRecord>>(
+            future: SleepStorage.loadRecords(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return StatPage(
+                  // Uncomment this line to show charts using real sleep data
+                  // sleepRecords: snapshot.data!,
+                  sleepRecords: _exampleRecords,
+                );
+              } else {
+                return Center(child: Text('loading'));
+              }
+            },
+          ),
+        ],
+      ),
+    );
     }
   }
 
