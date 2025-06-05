@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'home_page_dark_mode.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
@@ -145,6 +145,22 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Navigate to tent_page
+  void _goToDarkHomePage() {
+    Navigator.of(context).push(_createFadeRouteToDarkHomePage());
+  }
+
+  // Create a fade transition route to the tent_page
+  Route _createFadeRouteToDarkHomePage() {
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 500),
+      pageBuilder: (context, animation, secondaryAnimation) => Home_page_dark(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
+  }
+
   // Navigate to friend_page
   void _goToFriendPage() {
     Navigator.of(context).push(_createFadeRouteToFriendPage());
@@ -184,18 +200,18 @@ class _HomePageState extends State<HomePage> {
     int currency = await SleepStorage.loadCurrency();
     String targetSleepTime = await SleepStorage.loadTargetSleepTime();
     String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
-    // List<SleepRecord> record = await SleepStorage.loadRecords();
+    List<SleepRecord> record = await SleepStorage.loadRecords();
     setState(() {
       _userId = id;
       _isSleeping = sleeping;
       _currency = currency;
-      _sleepConsistantly = _calculateStrike(_exampleRecords);
+      _sleepConsistantly = _calculateStreak(record);
       _start = DateTime.parse(targetSleepTime);
       _end = DateTime.parse(targetWakeUpTime);
     });
   }
 
-  int _calculateStrike(List<SleepRecord> records) {
+  int _calculateStreak(List<SleepRecord> records) {
     int strike = 0;
     for (int i = 0; i < records.length; i++) {
       if (!records[i].sleepRecordState) {
@@ -336,7 +352,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _viewHistory() async {
-    final records = _exampleRecords; //await SleepStorage.loadRecords();
+    final records = await SleepStorage.loadRecords();
     if (!context.mounted) return;
     showDialog(
       // ignore: use_build_context_synchronously
@@ -452,8 +468,8 @@ class _HomePageState extends State<HomePage> {
                 if (snapshot.hasData) {
                   return StatPage(
                     // Uncomment this line to show charts using real sleep data
-                    // sleepRecords: snapshot.data!,
-                    sleepRecords: _exampleRecords,
+                    sleepRecords: snapshot.data!,
+                    // sleepRecords: _exampleRecords,
                   );
                 } else {
                   return Center(child: Text('loading'));
@@ -586,6 +602,10 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white.withAlpha(230),
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      _buildButton('Go to bed', _goToDarkHomePage),
+                      const SizedBox(height: 20),
+                      _buildButton('Sleep history', _viewHistory),
                     ],
                   ),
                 ),
@@ -635,8 +655,8 @@ class _HomePageState extends State<HomePage> {
                 if (snapshot.hasData) {
                   return StatPage(
                     // Uncomment this line to show charts using real sleep data
-                    // sleepRecords: snapshot.data!,
-                    sleepRecords: _exampleRecords,
+                    sleepRecords: snapshot.data!,
+                    // sleepRecords: _exampleRecords,
                   );
                 } else {
                   return Center(child: Text('loading'));
