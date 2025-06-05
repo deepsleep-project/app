@@ -411,6 +411,9 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    if (_isSleeping) {
+      AppNotification.cancelTodaySleepReminder();
+    }
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 800),
       switchInCurve: Curves.easeIn,

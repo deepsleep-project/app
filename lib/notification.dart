@@ -29,38 +29,68 @@ abstract class AppNotification {
   }
 
   static Future<void> publishSleepReminders(int startH, int startM) async {
-    final now = DateTime.now();
+  final now = DateTime.now();
 
-    bool passed =
-        now.hour > startH || (now.hour == startH && startM <= now.minute);
-    var scheduleDate = DateTime(
-      now.year,
-      now.month,
-      passed ? now.day + 1 : now.day,
-      startH,
-      startM,
-    );
-    final alarmSettings = AlarmSettings(
-      id: 42,
-      dateTime: scheduleDate,
-      assetAudioPath: 'assets/alarm.mp3',
-      loopAudio: true,
-      vibrate: true,
-      warningNotificationOnKill: Platform.isIOS,
-      androidFullScreenIntent: true,
-      volumeSettings: VolumeSettings.fade(
-        volume: 0.8,
-        fadeDuration: Duration(seconds: 5),
-      ),
-      notificationSettings: const NotificationSettings(
-        title: 'Bro it is sleep time',
-        body: 'are you ready?',
-        stopButton: 'I understand',
-        icon: 'ic_launcher.png',
-        iconColor: Color(0xff862778),
-      ),
-    );
-    await Alarm.set(alarmSettings: alarmSettings);
-    print('set clock on $startH:$startM');
+  bool passed =
+      now.hour > startH || (now.hour == startH && startM <= now.minute);
+  final scheduleDate = DateTime(
+    now.year,
+    now.month,
+    passed ? now.day + 1 : now.day,
+    startH,
+    startM,
+  );
+
+  final alarmSettings = AlarmSettings(
+    id: 42,
+    dateTime: scheduleDate,
+    assetAudioPath: 'assets/alarm.mp3',
+    loopAudio: true,
+    vibrate: true,
+    warningNotificationOnKill: Platform.isIOS,
+    androidFullScreenIntent: true,
+    volumeSettings: VolumeSettings.fade(
+      volume: 0.8,
+      fadeDuration: Duration(seconds: 5),
+    ),
+    notificationSettings: const NotificationSettings(
+      title: 'Bro it is sleep time',
+      body: 'are you ready?',
+      stopButton: 'I understand',
+      icon: 'ic_launcher.png',
+      iconColor: Color(0xff862778),
+    ),
+  );
+
+  await Alarm.set(alarmSettings: alarmSettings);
+    debugPrint('Alarm set for $scheduleDate');
   }
+  static void initializeAlarmListener() {
+    Alarm.ringStream.stream.listen((alarmSettings) {
+      debugPrint("Alarm ringing: ${alarmSettings.id}");
+
+      final nextAlarm = alarmSettings.dateTime.add(Duration(days: 1));
+      final newSettings = alarmSettings.copyWith(dateTime: nextAlarm);
+      Alarm.set(alarmSettings: newSettings);
+      debugPrint("Next day's alarm scheduled: ${newSettings.dateTime}");
+    });
+  }
+  static Future<void> cancelTodaySleepReminder() async {
+    final alarms = await Alarm.getAlarms();
+    final today = DateTime.now();
+
+    for (var alarm in alarms) {
+      if (alarm.id == 42 &&
+          alarm.dateTime.year == today.year &&
+          alarm.dateTime.month == today.month &&
+          alarm.dateTime.day == today.day) {
+        await Alarm.stop(alarm.id);
+        debugPrint('Today\'s alarm cancelled.');
+        return;
+      }
+    }
+
+    debugPrint('No alarm found for today.');
+  }
+
 }
