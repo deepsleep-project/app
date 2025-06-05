@@ -261,7 +261,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _notifyServer();
     _notifyDesktopWidget();
 
-    _showSnackBar('start sleep, current time: $_formattedTime');
   }
 
   Future<void> _endSleep() async {
@@ -308,8 +307,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _notifyServer();
     _notifyDesktopWidget();
-
-    _showSnackBar('wake up, curent time: $_formattedTime');
   }
 
   Future<void> _notifyDesktopWidget() async {
@@ -405,11 +402,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    if (_isSleeping) {
-      return FadeTransition(
-        opacity: _animation,
-        child: Scaffold(
-          body: PageView(
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 800),
+      switchInCurve: Curves.easeIn,
+      switchOutCurve: Curves.easeOut,
+      child: _isSleeping
+          ? _buildSleepingView(screenHeight)
+          : _buildAwakeView(screenHeight),
+    );
+  }
+
+  Widget _buildSleepingView(double screenHeight) {
+    return Scaffold(
+      key: ValueKey('sleeping'), // 关键：不同 key 才会触发动画
+      body: PageView(
         scrollDirection: Axis.vertical,
         physics: _isSleeping ? const NeverScrollableScrollPhysics() : const ClampingScrollPhysics(),
         children: [
@@ -471,10 +477,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
-    )
-      );
-    } else {
-      return Scaffold(
+    );
+  }
+
+  Widget _buildAwakeView(double screenHeight) {
+    return Scaffold(
+      key: ValueKey('awake'),
+      body: Scaffold(
       body: PageView(
         scrollDirection: Axis.vertical,
         physics: const ClampingScrollPhysics(),
@@ -655,8 +664,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ],
       ),
+    ),
     );
-    }
   }
 
   // Helper method to build a button widget with common styles
