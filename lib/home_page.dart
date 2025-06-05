@@ -35,65 +35,64 @@ class _HomePageState extends State<HomePage>
   late Animation<double> _animation;
 
   // Example sleep records with varied times
-  final List<SleepRecord> _exampleRecords = [
-    // Wednesday, May 28, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 5, 28, 21, 27).toIso8601String(),
-      end: DateTime.utc(2025, 5, 29, 7, 18).toIso8601String(),
-      date: DateTime.utc(2025, 5, 28, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-    // Thursday, May 29, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 5, 29, 22, 45).toIso8601String(),
-      end: DateTime.utc(2025, 5, 30, 7, 54).toIso8601String(),
-      date: DateTime.utc(2025, 5, 29, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-
-    // Friday, May 30, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 5, 30, 23, 09).toIso8601String(),
-      end: DateTime.utc(2025, 5, 31, 8, 12).toIso8601String(),
-      date: DateTime.utc(2025, 5, 30, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-    // Saturday, May 31, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 6, 1, 1, 27).toIso8601String(),
-      end: DateTime.utc(2025, 6, 1, 7, 36).toIso8601String(),
-      date: DateTime.utc(2025, 5, 31, 0, 0).toIso8601String(),
-      sleepRecordState: false,
-    ),
-    // Sunday, June 1, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 6, 1, 21, 58).toIso8601String(),
-      end: DateTime.utc(2025, 6, 2, 6, 43).toIso8601String(),
-      date: DateTime.utc(2025, 6, 1, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-    // Monday, June 2, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 6, 2, 23, 02).toIso8601String(),
-      end: DateTime.utc(2025, 6, 3, 7, 00).toIso8601String(),
-      date: DateTime.utc(2025, 6, 2, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-    // Tuesday, June 3, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 6, 3, 22, 52).toIso8601String(),
-      end: DateTime.utc(2025, 6, 4, 7, 20).toIso8601String(),
-      date: DateTime.utc(2025, 6, 3, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-    // Wednesday, June 4, 2025
-    SleepRecord(
-      start: DateTime.utc(2025, 6, 5, 1, 15).toIso8601String(),
-      end: DateTime.utc(2025, 6, 5, 7, 30).toIso8601String(),
-      date: DateTime.utc(2025, 6, 4, 0, 0).toIso8601String(),
-      sleepRecordState: true,
-    ),
-  ];
+  // final List<SleepRecord> _exampleRecords = [
+  //   // Wednesday, May 28, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 5, 28, 21, 27).toIso8601String(),
+  //     end: DateTime.utc(2025, 5, 29, 7, 18).toIso8601String(),
+  //     date: DateTime.utc(2025, 5, 28, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  //   // Thursday, May 29, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 5, 29, 22, 45).toIso8601String(),
+  //     end: DateTime.utc(2025, 5, 30, 7, 54).toIso8601String(),
+  //     date: DateTime.utc(2025, 5, 29, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  //   // Friday, May 30, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 5, 30, 23, 09).toIso8601String(),
+  //     end: DateTime.utc(2025, 5, 31, 8, 12).toIso8601String(),
+  //     date: DateTime.utc(2025, 5, 30, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  //   // Saturday, May 31, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 6, 1, 1, 27).toIso8601String(),
+  //     end: DateTime.utc(2025, 6, 1, 7, 36).toIso8601String(),
+  //     date: DateTime.utc(2025, 5, 31, 0, 0).toIso8601String(),
+  //     sleepRecordState: false,
+  //   ),
+  //   // Sunday, June 1, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 6, 1, 21, 58).toIso8601String(),
+  //     end: DateTime.utc(2025, 6, 2, 6, 43).toIso8601String(),
+  //     date: DateTime.utc(2025, 6, 1, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  //   // Monday, June 2, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 6, 2, 23, 02).toIso8601String(),
+  //     end: DateTime.utc(2025, 6, 3, 7, 00).toIso8601String(),
+  //     date: DateTime.utc(2025, 6, 2, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  //   // Tuesday, June 3, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 6, 3, 22, 52).toIso8601String(),
+  //     end: DateTime.utc(2025, 6, 4, 7, 20).toIso8601String(),
+  //     date: DateTime.utc(2025, 6, 3, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  //   // Wednesday, June 4, 2025
+  //   SleepRecord(
+  //     start: DateTime.utc(2025, 6, 5, 1, 15).toIso8601String(),
+  //     end: DateTime.utc(2025, 6, 5, 7, 30).toIso8601String(),
+  //     date: DateTime.utc(2025, 6, 4, 0, 0).toIso8601String(),
+  //     sleepRecordState: true,
+  //   ),
+  // ];
 
   @override
   void initState() {
@@ -354,8 +353,8 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _viewHistory() async {
-    // final records = await SleepStorage.loadRecords();
-    final records = _exampleRecords;
+    final records = await SleepStorage.loadRecords();
+    // final records = _exampleRecords;
     if (!context.mounted) return;
     showDialog(
       // ignore: use_build_context_synchronously
@@ -423,7 +422,7 @@ class _HomePageState extends State<HomePage>
 
   Widget _buildSleepingView(double screenHeight) {
     return Scaffold(
-      key: ValueKey('sleeping'), // 关键：不同 key 才会触发动画
+      key: ValueKey('sleeping'),
       body: PageView(
         scrollDirection: Axis.vertical,
         physics: _isSleeping
@@ -482,8 +481,8 @@ class _HomePageState extends State<HomePage>
               if (snapshot.hasData) {
                 return StatPage(
                   // Uncomment this line to show charts using real sleep data
-                  // sleepRecords: snapshot.data!,
-                  sleepRecords: _exampleRecords,
+                  sleepRecords: snapshot.data!,
+                  // sleepRecords: _exampleRecords,
                 );
               } else {
                 return Center(child: Text('loading'));
@@ -514,59 +513,34 @@ class _HomePageState extends State<HomePage>
                   top: screenHeight * 0.07,
                   left: screenHeight * 0.03,
                   child: SizedBox(
-                    width: 100,
+                    width: 250,
                     height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white.withAlpha(200),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.bolt, size: 25),
-                          Text(
-                            _currency.toString(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.deepPurple,
-                            ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.bolt, size: 30, color: Colors.yellow),
+                        Text(
+                          _currency.toString(),
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: screenHeight * 0.07,
-                  left: screenHeight * 0.15,
-                  child: SizedBox(
-                    width: 100,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white.withAlpha(200),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.local_fire_department, size: 25),
-                          Text(
-                            _sleepConsistantly.toString(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.deepPurple,
-                            ),
+                        SizedBox(width: 20),
+                        Icon(
+                          Icons.local_fire_department,
+                          size: 30,
+                          color: Colors.deepOrange,
+                        ),
+                        Text(
+                          ' ${_sleepConsistantly.toString()}',
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -669,8 +643,8 @@ class _HomePageState extends State<HomePage>
                 if (snapshot.hasData) {
                   return StatPage(
                     // Uncomment this line to show charts using real sleep data
-                    // sleepRecords: snapshot.data!,
-                    sleepRecords: _exampleRecords,
+                    sleepRecords: snapshot.data!,
+                    // sleepRecords: _exampleRecords,
                   );
                 } else {
                   return Center(child: Text('loading'));

@@ -19,34 +19,41 @@ class _FriendPageState extends State<FriendPage> {
   List<FriendRecord> _friends = [];
   List<FriendRequest> _friendRequests = [];
 
-  final List<FriendRequest> _exampleRequests = [
-    FriendRequest(username: 'Richard', userId: '76789'),
-    FriendRequest(username: 'Linda', userId: '67890'),
-  ];
+  // final List<FriendRequest> _exampleRequests = [
+  //   FriendRequest(username: 'Richard', userId: '76789'),
+  //   FriendRequest(username: 'Linda', userId: '67890'),
+  // ];
 
-  final List<FriendRecord> _exampleFriends = [
-    FriendRecord(username: 'Liam', userId: '25632', isAsleep: false, streak: 5),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, streak: 8),
-    FriendRecord(
-      username: 'Michael',
-      userId: '25632',
-      isAsleep: false,
-      streak: 9,
-    ),
-    FriendRecord(
-      username: 'Pascal',
-      userId: '52767',
-      isAsleep: true,
-      streak: 16,
-    ),
-    FriendRecord(
-      username: 'Oscar',
-      userId: '25632',
-      isAsleep: false,
-      streak: 2,
-    ),
-    FriendRecord(username: 'Maria', userId: '52767', isAsleep: true, streak: 7),
-  ];
+  // final List<FriendRecord> _exampleFriends = [
+  //   FriendRecord(username: 'Liam', userId: '25632', isAsleep: false, streak: 5),
+  //   FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, streak: 8),
+  //   FriendRecord(
+  //     username: 'Michael',
+  //     userId: '25632',
+  //     isAsleep: false,
+  //     streak: 9,
+  //   ),
+  //   FriendRecord(
+  //     username: 'Pascal',
+  //     userId: '52767',
+  //     isAsleep: true,
+  //     streak: 16,
+  //   ),
+  //   FriendRecord(
+  //     username: 'Oscar',
+  //     userId: '25632',
+  //     isAsleep: false,
+  //     streak: 2,
+  //   ),
+  //   FriendRecord(username: 'Maria', userId: '52767', isAsleep: true, streak: 5),
+  //   FriendRecord(username: 'Mark', userId: '52767', isAsleep: true, streak: 0),
+  //   FriendRecord(
+  //     username: 'Robbert',
+  //     userId: '52767',
+  //     isAsleep: true,
+  //     streak: 7,
+  //   ),
+  // ];
 
   @override
   void initState() {
@@ -173,66 +180,62 @@ class _FriendPageState extends State<FriendPage> {
           ),
 
           // Main content
-          Positioned(
+          Positioned.fill(
             top: screenHeight * 0.16,
             left: screenHeight * 0.015,
             right: screenHeight * 0.015,
-            child: Column(
-              children: [
-                // User info container
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  padding: EdgeInsets.only(
-                    left: 12,
-                    right: 12,
-                    top: 15,
-                    bottom: 15,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[100],
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black12, blurRadius: 4),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.person, color: Colors.blue, size: 28),
-                      SizedBox(width: 15),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _username,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (_userId.isNotEmpty) ...[
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // User info container
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black12, blurRadius: 4),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.person, color: Colors.blue, size: 28),
+                        SizedBox(width: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              _userId,
+                              _username,
                               style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                            if (_userId.isNotEmpty)
+                              Text(
+                                _userId,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
                           ],
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // Show list of friend requests and friends
-                FriendRequestList(
-                  userId: _userId,
-                  friendRequests: _friendRequests,
-                ),
-                FriendList(
-                  friends: _exampleFriends.toList()
-                    ..sort((a, b) => b.streak.compareTo(a.streak)),
-                ),
-              ],
+                  FriendRequestList(
+                    userId: _userId,
+                    friendRequests: _friendRequests,
+                  ),
+                  FriendList(
+                    friends: _friends,
+                    // friends: _exampleFriends.toList()
+                    //   ..sort((a, b) => b.streak.compareTo(a.streak)),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -468,7 +471,7 @@ class _FriendRequestListState extends State<FriendRequestList> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: Colors.deepOrange,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
