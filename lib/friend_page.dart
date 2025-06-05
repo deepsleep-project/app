@@ -25,12 +25,27 @@ class _FriendPageState extends State<FriendPage> {
   ];
 
   final List<FriendRecord> _exampleFriends = [
-    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 5),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 8),
-    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 9),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 16),
-    FriendRecord(username: 'Michael', userId: '25632', isAsleep: false, strike: 2),
-    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, strike: 7),
+    FriendRecord(username: 'Liam', userId: '25632', isAsleep: false, streak: 5),
+    FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, streak: 8),
+    FriendRecord(
+      username: 'Michael',
+      userId: '25632',
+      isAsleep: false,
+      streak: 9,
+    ),
+    FriendRecord(
+      username: 'Pascal',
+      userId: '52767',
+      isAsleep: true,
+      streak: 16,
+    ),
+    FriendRecord(
+      username: 'Oscar',
+      userId: '25632',
+      isAsleep: false,
+      streak: 2,
+    ),
+    FriendRecord(username: 'Maria', userId: '52767', isAsleep: true, streak: 7),
   ];
 
   @override
@@ -46,17 +61,17 @@ class _FriendPageState extends State<FriendPage> {
 
     setState(() {
       _username = username ?? 'You are not registered.';
-      _userId = userId ?? '';
+      _userId = userId;
     });
     List<FriendRequest> requests = [];
     List<FriendRecord> friends = [];
     bool timeout = false;
 
-    if (userId != null && userId.isNotEmpty) {
+    if (userId.isNotEmpty) {
       try {
         requests =
             await Internet.fetchFriendRequest(userId).timeout(
-              const Duration(seconds: 2),
+              const Duration(seconds: 10),
               onTimeout: () {
                 timeout = true;
                 return [];
@@ -68,11 +83,11 @@ class _FriendPageState extends State<FriendPage> {
       }
     }
 
-    if ((userId ?? '').isNotEmpty && (!timeout)) {
+    if ((userId).isNotEmpty && (!timeout)) {
       try {
         friends =
-            await Internet.getFriendList(userId!).timeout(
-              const Duration(seconds: 2),
+            await Internet.getFriendList(userId).timeout(
+              const Duration(seconds: 10),
               onTimeout: () {
                 timeout = true;
                 return [];
@@ -90,7 +105,6 @@ class _FriendPageState extends State<FriendPage> {
       );
       return;
     } else {
-      
       sortFriend(friends);
     }
     setState(() {
@@ -110,17 +124,16 @@ class _FriendPageState extends State<FriendPage> {
 
   void sortFriend(List<FriendRecord> list) async {
     bool isasleep = await SleepStorage.loadIsSleeping();
-    int strike1 = await SleepStorage.loadStreak();
-    list.add(FriendRecord(username: _username, userId: _userId, isAsleep: isasleep, strike: strike1));
-    for (int i = 0; i < list.length; i++) {
-      for (int ii = 0; ii < list.length; ii++){
-        if (list[i].strike>list[ii].strike){
-          FriendRecord temp = list[i];
-          list[i] = list[ii];
-          list[ii] = temp;
-        }
-      }
-    }
+    int streak1 = await SleepStorage.loadStreak();
+    list.add(
+      FriendRecord(
+        username: _username,
+        userId: _userId,
+        isAsleep: isasleep,
+        streak: streak1,
+      ),
+    );
+    list.sort((a, b) => b.streak.compareTo(a.streak));
   }
 
   @override
@@ -215,7 +228,10 @@ class _FriendPageState extends State<FriendPage> {
                   userId: _userId,
                   friendRequests: _friendRequests,
                 ),
-                FriendList(friends: _friends),
+                FriendList(
+                  friends: _exampleFriends.toList()
+                    ..sort((a, b) => b.streak.compareTo(a.streak)),
+                ),
               ],
             ),
           ),
@@ -485,11 +501,7 @@ class _FriendListState extends State<FriendList> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: widget.friends
-    .asMap()
-    .entries
-    .map(
-      (entry) {
+      children: widget.friends.asMap().entries.map((entry) {
         final index = entry.key;
         final friend = entry.value;
 
@@ -511,8 +523,8 @@ class _FriendListState extends State<FriendList> {
         }
 
         return Container(
-          margin: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          padding: EdgeInsets.only(left: 12, right: 12, top: 15, bottom: 20),
+          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          padding: EdgeInsets.only(left: 12, right: 12, top: 15, bottom: 15),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(16),
@@ -525,31 +537,40 @@ class _FriendListState extends State<FriendList> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    friend.username,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  Row(
+                    children: [
+                      Text(
+                        ' ${friend.username}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      friend.isAsleep
+                          ? Icon(Icons.dark_mode, color: Colors.indigo)
+                          : Icon(Icons.light_mode, color: Colors.orange),
+                    ],
                   ),
-                  Text(
-                    'strike: ${friend.strike}',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Icon(Icons.local_fire_department, color: Colors.red),
+                      Text(
+                        'Streak: ${friend.streak}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    friend.userId,
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  SizedBox(height: 10),
-                  friend.isAsleep
-                      ? Icon(Icons.dark_mode, color: Colors.indigo)
-                      : Icon(Icons.light_mode, color: Colors.orange),
                 ],
               ),
             ],
           ),
         );
-      },
-    )
-    .toList(),
-
+      }).toList(),
     );
   }
 }

@@ -22,7 +22,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   String _userId = '';
   String _formattedTime = '';
   bool _isSleeping = false;
@@ -35,56 +36,63 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   // Example sleep records with varied times
   final List<SleepRecord> _exampleRecords = [
-    // // Wednesday, May 28, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 5, 28, 21, 27).toIso8601String(),
-    //   end: DateTime.utc(2025, 5, 29, 7, 18).toIso8601String(),
-    //   date: DateTime.utc(2025, 5, 28, 0, 0).toIso8601String(),
-    //   sleepRecordState: true,
-    // ),
-    // // Thursday, May 29, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 5, 29, 22, 45).toIso8601String(),
-    //   end: DateTime.utc(2025, 5, 30, 7, 54).toIso8601String(),
-    //   date: DateTime.utc(2025, 5, 29, 0, 0).toIso8601String(),
-    //   sleepRecordState: true,
-    // ),
-    //
-    // // Friday, May 30, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 5, 30, 23, 09).toIso8601String(),
-    //   end: DateTime.utc(2025, 5, 31, 8, 12).toIso8601String(),
-    //   date: DateTime.utc(2025, 5, 30, 0, 0).toIso8601String(),
-    //   sleepRecordState: true,
-    // ),
-    // // Saturday, May 31, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 6, 1, 1, 27).toIso8601String(),
-    //   end: DateTime.utc(2025, 6, 1, 7, 36).toIso8601String(),
-    //   date: DateTime.utc(2025, 5, 31, 0, 0).toIso8601String(),
-    //   sleepRecordState: false,
-    // ),
-    // // Sunday, June 1, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 6, 1, 21, 58).toIso8601String(),
-    //   end: DateTime.utc(2025, 6, 2, 6, 43).toIso8601String(),
-    //   date: DateTime.utc(2025, 6, 1, 0, 0).toIso8601String(),
-    //   sleepRecordState: true,
-    // ),
-    // // Monday, June 2, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 6, 2, 23, 02).toIso8601String(),
-    //   end: DateTime.utc(2025, 6, 3, 7, 00).toIso8601String(),
-    //   date: DateTime.utc(2025, 6, 2, 0, 0).toIso8601String(),
-    //   sleepRecordState: true,
-    // ),
-    // // Tuesday, June 3, 2025
-    // SleepRecord(
-    //   start: DateTime.utc(2025, 6, 3, 22, 52).toIso8601String(),
-    //   end: DateTime.utc(2025, 6, 4, 7, 20).toIso8601String(),
-    //   date: DateTime.utc(2025, 6, 3, 0, 0).toIso8601String(),
-    //   sleepRecordState: true,
-    // ),
+    // Wednesday, May 28, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 5, 28, 21, 27).toIso8601String(),
+      end: DateTime.utc(2025, 5, 29, 7, 18).toIso8601String(),
+      date: DateTime.utc(2025, 5, 28, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Thursday, May 29, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 5, 29, 22, 45).toIso8601String(),
+      end: DateTime.utc(2025, 5, 30, 7, 54).toIso8601String(),
+      date: DateTime.utc(2025, 5, 29, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+
+    // Friday, May 30, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 5, 30, 23, 09).toIso8601String(),
+      end: DateTime.utc(2025, 5, 31, 8, 12).toIso8601String(),
+      date: DateTime.utc(2025, 5, 30, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Saturday, May 31, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 6, 1, 1, 27).toIso8601String(),
+      end: DateTime.utc(2025, 6, 1, 7, 36).toIso8601String(),
+      date: DateTime.utc(2025, 5, 31, 0, 0).toIso8601String(),
+      sleepRecordState: false,
+    ),
+    // Sunday, June 1, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 6, 1, 21, 58).toIso8601String(),
+      end: DateTime.utc(2025, 6, 2, 6, 43).toIso8601String(),
+      date: DateTime.utc(2025, 6, 1, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Monday, June 2, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 6, 2, 23, 02).toIso8601String(),
+      end: DateTime.utc(2025, 6, 3, 7, 00).toIso8601String(),
+      date: DateTime.utc(2025, 6, 2, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Tuesday, June 3, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 6, 3, 22, 52).toIso8601String(),
+      end: DateTime.utc(2025, 6, 4, 7, 20).toIso8601String(),
+      date: DateTime.utc(2025, 6, 3, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
+    // Wednesday, June 4, 2025
+    SleepRecord(
+      start: DateTime.utc(2025, 6, 5, 1, 15).toIso8601String(),
+      end: DateTime.utc(2025, 6, 5, 7, 30).toIso8601String(),
+      date: DateTime.utc(2025, 6, 4, 0, 0).toIso8601String(),
+      sleepRecordState: true,
+    ),
   ];
 
   @override
@@ -226,14 +234,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     bool timeout = false;
     if (_isSleeping && _userId.isNotEmpty) {
       await Internet.setAsleep(_userId).timeout(
-        const Duration(seconds: 2),
+        const Duration(seconds: 10),
         onTimeout: () {
           timeout = true;
         },
       );
     } else if (_userId.isNotEmpty) {
       await Internet.setAwake(_userId).timeout(
-        const Duration(seconds: 2),
+        const Duration(seconds: 10),
         onTimeout: () {
           timeout = true;
         },
@@ -260,7 +268,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _notifyServer();
     _notifyDesktopWidget();
-
   }
 
   Future<void> _endSleep() async {
@@ -347,7 +354,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Future<void> _viewHistory() async {
-    final records = await SleepStorage.loadRecords();
+    // final records = await SleepStorage.loadRecords();
+    final records = _exampleRecords;
     if (!context.mounted) return;
     showDialog(
       // ignore: use_build_context_synchronously
@@ -399,7 +407,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
-@override
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return AnimatedSwitcher(
@@ -417,14 +426,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       key: ValueKey('sleeping'), // 关键：不同 key 才会触发动画
       body: PageView(
         scrollDirection: Axis.vertical,
-        physics: _isSleeping ? const NeverScrollableScrollPhysics() : const ClampingScrollPhysics(),
+        physics: _isSleeping
+            ? const NeverScrollableScrollPhysics()
+            : const ClampingScrollPhysics(),
         children: [
           Stack(
             fit: StackFit.expand,
             children: [
               Align(
                 alignment: Alignment.bottomRight,
-                child: Image.asset('assets/night.png', fit: BoxFit.fitHeight, height: screenHeight),
+                child: Image.asset(
+                  'assets/night.png',
+                  fit: BoxFit.fitHeight,
+                  height: screenHeight,
+                ),
               ),
               Transform.translate(
                 offset: Offset(0, -screenHeight * 0.19),
@@ -484,187 +499,187 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       key: ValueKey('awake'),
       body: Scaffold(
-      body: PageView(
-        scrollDirection: Axis.vertical,
-        physics: const ClampingScrollPhysics(),
-        children: [
-          Stack(
-            fit: StackFit.expand,
-            children: [
-              Align(
-                alignment: Alignment.bottomRight,
-                child: DayNightImage(screenHeight: screenHeight),
-              ),
-              Positioned(
-                top: screenHeight * 0.07,
-                left: screenHeight * 0.03,
-                child: SizedBox(
-                  width: 100,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withAlpha(200),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+        body: PageView(
+          scrollDirection: Axis.vertical,
+          physics: const ClampingScrollPhysics(),
+          children: [
+            Stack(
+              fit: StackFit.expand,
+              children: [
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: DayNightImage(screenHeight: screenHeight),
+                ),
+                Positioned(
+                  top: screenHeight * 0.07,
+                  left: screenHeight * 0.03,
+                  child: SizedBox(
+                    width: 100,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withAlpha(200),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.bolt, size: 25),
+                          Text(
+                            _currency.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.deepPurple,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
+                  ),
+                ),
+                Positioned(
+                  top: screenHeight * 0.07,
+                  left: screenHeight * 0.15,
+                  child: SizedBox(
+                    width: 100,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withAlpha(200),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.local_fire_department, size: 25),
+                          Text(
+                            _sleepConsistantly.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.deepPurple,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Transform.translate(
+                  offset: Offset(0, -screenHeight * 0.19),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.bolt, size: 25),
                         Text(
-                          _currency.toString(),
+                          _formattedTime,
                           style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.deepPurple,
+                            fontFamily: "Digital",
+                            letterSpacing: -2,
+                            fontSize: 80,
+                            color: Colors.white,
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        if (!_isSleeping)
+                          _buildButton('Go to bed', _startSleep)
+                        else
+                          _buildButton('Get up', _endSleep),
+                        const SizedBox(height: 20),
+                        _buildButton('Sleep history', _viewHistory),
                       ],
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                top: screenHeight * 0.07,
-                left: screenHeight * 0.15,
-                child: SizedBox(
-                  width: 100,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withAlpha(200),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.local_fire_department, size: 25),
-                        Text(
-                          _sleepConsistantly.toString(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Transform.translate(
-                offset: Offset(0, -screenHeight * 0.19),
-                child: Center(
+
+                // Toolbar friends icon to navigate to friends page
+                Positioned(
+                  top: screenHeight * 0.07,
+                  right: screenHeight * 0.03,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        _formattedTime,
-                        style: TextStyle(
-                          fontFamily: "Digital",
-                          letterSpacing: -2,
-                          fontSize: 80,
-                          color: Colors.white,
+                      GestureDetector(
+                        onTap: _goToFriendPage,
+                        child: Icon(
+                          Icons.people,
+                          size: 40,
+                          color: Colors.white.withAlpha(230),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      if (!_isSleeping)
-                        _buildButton('Go to bed', _startSleep)
-                      else
-                        _buildButton('Get up', _endSleep),
-                      const SizedBox(height: 20),
-                      _buildButton('Sleep history', _viewHistory),
+                      SizedBox(height: screenHeight * 0.01),
+                      GestureDetector(
+                        onTap: _goToSettingPage,
+                        child: Icon(
+                          Icons.settings,
+                          size: 40,
+                          color: Colors.white.withAlpha(230),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
 
-              // Toolbar friends icon to navigate to friends page
-              Positioned(
-                top: screenHeight * 0.07,
-                right: screenHeight * 0.03,
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: _goToFriendPage,
-                      child: Icon(
-                        Icons.people,
-                        size: 40,
-                        color: Colors.white.withAlpha(230),
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    GestureDetector(
-                      onTap: _goToSettingPage,
-                      child: Icon(
-                        Icons.settings,
-                        size: 40,
-                        color: Colors.white.withAlpha(230),
-                      ),
-                    ),
-                  ],
+                // Invisible button to navigate to tent_page
+                Positioned(
+                  bottom: screenHeight * 0.2,
+                  left: screenHeight * 0.08,
+                  right: screenHeight * 0.1,
+                  height: screenHeight * 0.19,
+                  child: GestureDetector(
+                    onTap: _goToTentPage,
+                    child: Container(color: Colors.transparent),
+                  ),
                 ),
-              ),
 
-              // Invisible button to navigate to tent_page
-              Positioned(
-                bottom: screenHeight * 0.2,
-                left: screenHeight * 0.08,
-                right: screenHeight * 0.1,
-                height: screenHeight * 0.19,
-                child: GestureDetector(
-                  onTap: _goToTentPage,
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-
-              // Text "statistics" at bottom
-              Positioned(
-                bottom: screenHeight * 0.03,
-                left: screenHeight * 0.1,
-                right: screenHeight * 0.1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'statistics',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white.withAlpha(230),
+                // Text "statistics" at bottom
+                Positioned(
+                  bottom: screenHeight * 0.03,
+                  left: screenHeight * 0.1,
+                  right: screenHeight * 0.1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'statistics',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white.withAlpha(230),
+                        ),
                       ),
-                    ),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white.withAlpha(230),
-                      size: 50,
-                    ),
-                  ],
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.white.withAlpha(230),
+                        size: 50,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          FutureBuilder<List<SleepRecord>>(
-            future: SleepStorage.loadRecords(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return StatPage(
-                  // Uncomment this line to show charts using real sleep data
-                  // sleepRecords: snapshot.data!,
-                  sleepRecords: _exampleRecords,
-                );
-              } else {
-                return Center(child: Text('loading'));
-              }
-            },
-          ),
-        ],
+              ],
+            ),
+            FutureBuilder<List<SleepRecord>>(
+              future: SleepStorage.loadRecords(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return StatPage(
+                    // Uncomment this line to show charts using real sleep data
+                    // sleepRecords: snapshot.data!,
+                    sleepRecords: _exampleRecords,
+                  );
+                } else {
+                  return Center(child: Text('loading'));
+                }
+              },
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 

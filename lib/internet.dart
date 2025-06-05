@@ -92,7 +92,12 @@ abstract class Internet {
         bool isAsleep = await getAsleep(ids[i]);
         int strike1 = await strikefetch(ids[i]);
         result.add(
-          FriendRecord(username: name, userId: ids[i], isAsleep: isAsleep, strike: strike1),
+          FriendRecord(
+            username: name,
+            userId: ids[i],
+            isAsleep: isAsleep,
+            streak: strike1,
+          ),
         );
       }
       return result;
@@ -125,7 +130,7 @@ abstract class Internet {
     }
   }
 
-    static Future<int> strikefetch(String friendUID) async {
+  static Future<int> strikefetch(String friendUID) async {
     final url = Uri.parse('$_serverURL/streak/get/$friendUID');
     final response = await http.get(url);
     if (response.statusCode == 200) {
