@@ -31,36 +31,36 @@ abstract class AppNotification {
   static Future<void> publishSleepReminders(int startH, int startM) async {
     final now = DateTime.now();
 
+    bool passed =
+        now.hour > startH || (now.hour == startH && startM <= now.minute);
     var scheduleDate = DateTime(
       now.year,
       now.month,
-      now.day,
+      passed ? now.day + 1 : now.day,
       startH,
-      startM
+      startM,
     );
     final alarmSettings = AlarmSettings(
-    id: 42,
-    dateTime: scheduleDate,
-    assetAudioPath: 'assets/alarm.mp3',
-    loopAudio: true,
-    vibrate: true,
-    warningNotificationOnKill: Platform.isIOS,
-    androidFullScreenIntent: true,
-    volumeSettings: VolumeSettings.fade(
-      volume: 0.8,
-      fadeDuration: Duration(seconds: 5),
-      volumeEnforced: true,
-    ),
-    notificationSettings: const NotificationSettings(
-      title: 'Bro it is sleep time',
-      body: 'are you ready?',
-      stopButton: 'I understand',
-      icon: 'ic_launcher.png',
-      iconColor: Color(0xff862778),
-    ),
-
-  );
-  await Alarm.set(alarmSettings: alarmSettings);
-  print('set clock on $startH:$startM');
+      id: 42,
+      dateTime: scheduleDate,
+      assetAudioPath: 'assets/alarm.mp3',
+      loopAudio: true,
+      vibrate: true,
+      warningNotificationOnKill: Platform.isIOS,
+      androidFullScreenIntent: true,
+      volumeSettings: VolumeSettings.fade(
+        volume: 0.8,
+        fadeDuration: Duration(seconds: 5),
+      ),
+      notificationSettings: const NotificationSettings(
+        title: 'Bro it is sleep time',
+        body: 'are you ready?',
+        stopButton: 'I understand',
+        icon: 'ic_launcher.png',
+        iconColor: Color(0xff862778),
+      ),
+    );
+    await Alarm.set(alarmSettings: alarmSettings);
+    print('set clock on $startH:$startM');
   }
 }
