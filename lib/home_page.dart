@@ -392,8 +392,73 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-
-    return Scaffold(
+    if (_isSleeping) {
+      return Scaffold(
+      body: PageView(
+        scrollDirection: Axis.vertical,
+        physics: _isSleeping ? const NeverScrollableScrollPhysics() : const ClampingScrollPhysics(),
+        children: [
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Image.asset('assets/night.png', fit: BoxFit.fitHeight, height: screenHeight),
+              ),
+              Transform.translate(
+                offset: Offset(0, -screenHeight * 0.19),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formattedTime,
+                        style: TextStyle(
+                          fontFamily: "Digital",
+                          letterSpacing: -2,
+                          fontSize: 80,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildButton('Get up', _endSleep),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+              ),
+              // Invisible button to navigate to tent_page
+              Positioned(
+                bottom: screenHeight * 0.2,
+                left: screenHeight * 0.08,
+                right: screenHeight * 0.1,
+                height: screenHeight * 0.19,
+                child: GestureDetector(
+                  onTap: _goToTentPage,
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+            ],
+          ),
+          FutureBuilder<List<SleepRecord>>(
+            future: SleepStorage.loadRecords(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return StatPage(
+                  // Uncomment this line to show charts using real sleep data
+                  // sleepRecords: snapshot.data!,
+                  sleepRecords: _exampleRecords,
+                );
+              } else {
+                return Center(child: Text('loading'));
+              }
+            },
+          ),
+        ],
+      ),
+    );
+    } else {
+      return Scaffold(
       body: PageView(
         scrollDirection: Axis.vertical,
         physics: const ClampingScrollPhysics(),
@@ -575,6 +640,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+    }
   }
 
   // Helper method to build a button widget with common styles
