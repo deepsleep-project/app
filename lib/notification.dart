@@ -29,42 +29,43 @@ abstract class AppNotification {
   }
 
   static Future<void> publishSleepReminders(int startH, int startM) async {
-  final now = DateTime.now();
+    final now = DateTime.now();
 
-  bool passed =
-      now.hour > startH || (now.hour == startH && startM <= now.minute);
-  final scheduleDate = DateTime(
-    now.year,
-    now.month,
-    passed ? now.day + 1 : now.day,
-    startH,
-    startM,
-  );
+    bool passed =
+        now.hour > startH || (now.hour == startH && startM <= now.minute);
+    final scheduleDate = DateTime(
+      now.year,
+      now.month,
+      passed ? now.day + 1 : now.day,
+      startH,
+      startM,
+    );
 
-  final alarmSettings = AlarmSettings(
-    id: 42,
-    dateTime: scheduleDate,
-    assetAudioPath: 'assets/alarm.mp3',
-    loopAudio: true,
-    vibrate: true,
-    warningNotificationOnKill: Platform.isIOS,
-    androidFullScreenIntent: true,
-    volumeSettings: VolumeSettings.fade(
-      volume: 0.8,
-      fadeDuration: Duration(seconds: 5),
-    ),
-    notificationSettings: const NotificationSettings(
-      title: 'Bro it is sleep time',
-      body: 'are you ready?',
-      stopButton: 'I understand',
-      icon: 'ic_launcher.png',
-      iconColor: Color(0xff862778),
-    ),
-  );
+    final alarmSettings = AlarmSettings(
+      id: 42,
+      dateTime: scheduleDate,
+      assetAudioPath: 'alarm.mp3',
+      loopAudio: true,
+      vibrate: true,
+      warningNotificationOnKill: Platform.isIOS,
+      androidFullScreenIntent: true,
+      volumeSettings: VolumeSettings.fade(
+        volume: 0.8,
+        fadeDuration: Duration(seconds: 5),
+      ),
+      notificationSettings: const NotificationSettings(
+        title: 'Bro it is sleep time',
+        body: 'are you ready?',
+        stopButton: 'I understand',
+        icon: 'ic_launcher.png',
+        iconColor: Color(0xff862778),
+      ),
+    );
 
-  await Alarm.set(alarmSettings: alarmSettings);
+    await Alarm.set(alarmSettings: alarmSettings);
     debugPrint('Alarm set for $scheduleDate');
   }
+
   static void initializeAlarmListener() {
     Alarm.ringStream.stream.listen((alarmSettings) {
       debugPrint("Alarm ringing: ${alarmSettings.id}");
