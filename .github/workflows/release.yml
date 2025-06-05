@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build_android:
-    runs-on: ubuntu-latest-large
+    runs-on: ubuntu-latest
     name: Build android releases and push artifacts
     steps:
       - name: Clone repository
