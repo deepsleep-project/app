@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'tent_page.dart';
 
-class Home_page_dark extends StatefulWidget {
-  const Home_page_dark({super.key});
+class DarkHomePage extends StatefulWidget {
+  const DarkHomePage({super.key});
 
   @override
-  State<Home_page_dark> createState() => _TentPageState();
+  State<DarkHomePage> createState() => _TentPageState();
 }
 
-class _TentPageState extends State<Home_page_dark> {
+class _TentPageState extends State<DarkHomePage> {
   String _formattedTime = '';
 
   void _updateTime() {
@@ -37,6 +37,7 @@ class _TentPageState extends State<Home_page_dark> {
       },
     );
   }
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +47,6 @@ class _TentPageState extends State<Home_page_dark> {
       _updateTime();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,11 @@ class _TentPageState extends State<Home_page_dark> {
             children: [
               Align(
                 alignment: Alignment.bottomRight,
-                child: Image.asset('assets/night.png', fit: BoxFit.fitHeight, height: screenHeight),
+                child: Image.asset(
+                  'assets/night.png',
+                  fit: BoxFit.fitHeight,
+                  height: screenHeight,
+                ),
               ),
               Transform.translate(
                 offset: Offset(0, -screenHeight * 0.19),
@@ -85,20 +89,28 @@ class _TentPageState extends State<Home_page_dark> {
                         height: 60,
                         child: ElevatedButton(
                           onPressed: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: child,
-                                    );
-                                  },
-                                  transitionDuration: Duration(milliseconds: 500),
-                                ),
-                              );
-                            },
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        HomePage(),
+                                transitionsBuilder:
+                                    (
+                                      context,
+                                      animation,
+                                      secondaryAnimation,
+                                      child,
+                                    ) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                transitionDuration: Duration(milliseconds: 500),
+                              ),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white.withAlpha(200),
                             shape: RoundedRectangleBorder(
@@ -133,7 +145,6 @@ class _TentPageState extends State<Home_page_dark> {
               ),
             ],
           ),
-
         ],
       ),
     );

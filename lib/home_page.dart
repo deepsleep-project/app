@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'home_page_dark_mode.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:drp_19/friend_page.dart';
 import 'package:drp_19/internet.dart';
@@ -32,7 +31,7 @@ class _HomePageState extends State<HomePage>
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
   late AnimationController _controller;
-  late Animation<double> _animation;
+  // late Animation<double> _animation;
 
   // Example sleep records with varied times
   // final List<SleepRecord> _exampleRecords = [
@@ -101,7 +100,7 @@ class _HomePageState extends State<HomePage>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    // _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
     _updateTime();
     // Update the time every second
@@ -693,13 +692,13 @@ class _HomePageState extends State<HomePage>
 
     channel.setMethodCallHandler((call) async {
       if (call.method == 'onRefresh') {
-        print("✅ 通过原生通道收到刷新广播");
-        print("newStatus: ${call.arguments as bool}");
+        debugPrint("✅ 通过原生通道收到刷新广播");
+        debugPrint("newStatus: ${call.arguments as bool}");
         setState(() => _isSleeping = call.arguments as bool);
       }
       return Future.value(null);
     });
-    print("正在监听广播");
+    debugPrint("正在监听广播");
   }
 }
 

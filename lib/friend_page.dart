@@ -3,13 +3,12 @@ import 'package:drp_19/storage.dart';
 import 'package:flutter/material.dart';
 import 'internet.dart';
 import 'friend.dart';
-import 'package:drp_19/storage.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
 
   @override
-  _FriendPageState createState() => _FriendPageState();
+  State<FriendPage> createState() => _FriendPageState();
 }
 
 class _FriendPageState extends State<FriendPage> {
@@ -106,7 +105,7 @@ class _FriendPageState extends State<FriendPage> {
       }
     }
 
-    if (timeout) {
+    if (timeout && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Network timeout: failed to reach server.')),
       );
@@ -294,7 +293,7 @@ class _FriendPageState extends State<FriendPage> {
               _userId = id ?? '';
             });
 
-            if (_userId.isEmpty) {
+            if (_userId.isEmpty && mounted) {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text('Error registering user')));
@@ -353,11 +352,11 @@ class _FriendPageState extends State<FriendPage> {
               _userId,
               friendUsername,
             );
-            if (addFriendStates ?? false) {
+            if ((addFriendStates ?? false) && mounted) {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text('friend request sent')));
-            } else {
+            } else if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('error sending friend request')),
               );
@@ -391,7 +390,7 @@ class FriendRequestList extends StatefulWidget {
   });
 
   @override
-  _FriendRequestListState createState() => _FriendRequestListState();
+  State<FriendRequestList> createState() => _FriendRequestListState();
 }
 
 class _FriendRequestListState extends State<FriendRequestList> {
@@ -497,7 +496,7 @@ class FriendList extends StatefulWidget {
   const FriendList({super.key, required this.friends});
 
   @override
-  _FriendListState createState() => _FriendListState();
+  State<FriendList> createState() => _FriendListState();
 }
 
 class _FriendListState extends State<FriendList> {

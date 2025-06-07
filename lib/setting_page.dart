@@ -7,7 +7,7 @@ class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
 
   @override
-  _SettingPageState createState() => _SettingPageState();
+  State<SettingPage> createState() => _SettingPageState();
 }
 
 class _SettingPageState extends State<SettingPage> {
@@ -41,8 +41,10 @@ class _SettingPageState extends State<SettingPage> {
 }
 
 class TimePickerWithTap extends StatefulWidget {
+  const TimePickerWithTap({super.key});
+
   @override
-  _TimePickerWithTapState createState() => _TimePickerWithTapState();
+  State<TimePickerWithTap> createState() => _TimePickerWithTapState();
 }
 
 class _TimePickerWithTapState extends State<TimePickerWithTap> {
@@ -102,14 +104,14 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
       startHour,
       startMinute,
     ).toIso8601String();
-    print(time);
+    debugPrint(time);
     AppNotification.publishSleepReminders(startHour, startMinute);
     SleepStorage.saveTargetSleepTime(time);
   }
 
   void _saveEndTime() {
     String time = DateTime(2025, 0, 0, endHour, endMinute).toIso8601String();
-    print(time);
+    debugPrint(time);
     SleepStorage.saveTargetWakeUpTime(time);
   }
 
@@ -200,7 +202,6 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -345,7 +346,7 @@ class SleepTimeBar extends StatelessWidget {
                           height: 18,
                           width: barWidth * (healthyEnd - healthyStart),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.3),
+                            color: Colors.green.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(9),
                           ),
                         ),
@@ -473,7 +474,7 @@ class WakeupTimeBar extends StatelessWidget {
                           height: 18,
                           width: barWidth * (healthyEnd - healthyStart),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.3),
+                            color: Colors.green.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(9),
                           ),
                         ),
@@ -609,7 +610,7 @@ class SleepDuration extends StatelessWidget {
                           height: 18,
                           width: barWidth * (healthyEnd - healthyStart),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.3),
+                            color: Colors.green.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(9),
                           ),
                         ),

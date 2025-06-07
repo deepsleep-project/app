@@ -1,9 +1,6 @@
 import 'dart:io';
 
 import 'package:alarm/alarm.dart';
-import 'package:alarm/model/alarm_settings.dart';
-import 'package:alarm/model/notification_settings.dart';
-import 'package:alarm/model/volume_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -67,7 +64,8 @@ abstract class AppNotification {
   }
 
   static void initializeAlarmListener() {
-    Alarm.ringStream.stream.listen((alarmSettings) {
+    Alarm.scheduled.listen((alarmSet) {
+      final alarmSettings = alarmSet.alarms.first;
       debugPrint("Alarm ringing: ${alarmSettings.id}");
 
       final nextAlarm = alarmSettings.dateTime.add(Duration(days: 1));
@@ -76,6 +74,7 @@ abstract class AppNotification {
       debugPrint("Next day's alarm scheduled: ${newSettings.dateTime}");
     });
   }
+
   static Future<void> cancelTodaySleepReminder() async {
     final alarms = await Alarm.getAlarms();
     final today = DateTime.now();
@@ -86,12 +85,11 @@ abstract class AppNotification {
           alarm.dateTime.month == today.month &&
           alarm.dateTime.day == today.day) {
         await Alarm.stop(alarm.id);
-        debugPrint('Today\'s alarm cancelled.');
+        debugPrint("Today's alarm cancelled.");
         return;
       }
     }
 
     debugPrint('No alarm found for today.');
   }
-
 }
