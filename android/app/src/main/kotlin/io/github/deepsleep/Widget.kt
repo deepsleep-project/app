@@ -1,4 +1,4 @@
-package com.example.drp_19
+package io.github.deepsleep
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -13,9 +13,9 @@ import java.net.URL
 
 class Widget : AppWidgetProvider() {
     companion object {
-        const val ACTION_TOGGLE = "com.example.drp_19.TOGGLE_SLEEP"
-        const val ACTION_REFRESH = "com.example.drp_19.REFRESH_WIDGET"
-        const val ACTION_REFRESH_APP = "com.example.drp_19.REFRESH_APP"
+        const val ACTION_TOGGLE = "io.github.deepsleep.TOGGLE_SLEEP"
+        const val ACTION_REFRESH = "io.github.deepsleep.REFRESH_WIDGET"
+        const val ACTION_REFRESH_APP = "io.github.deepsleep.REFRESH_APP"
         private const val PREFS_NAME = "FlutterSharedPreferences"
         private const val SERVER_URL = "http://146.169.26.221:3000"
 
@@ -99,7 +99,7 @@ class Widget : AppWidgetProvider() {
             }
             postSleepStatus(getUID(context), sleeping)
             context.sendBroadcast(Intent(ACTION_REFRESH_APP).apply {
-                `package` = "com.example.drp_19"
+                `package` = "io.github.deepsleep"
                 putExtra("status", sleeping) // 添加额外参数
             })
             Log.d("Widget", "发送状态变化广播: $sleeping")

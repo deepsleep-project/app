@@ -22,7 +22,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="drp_19"
+        android:label="deepsleep"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <receiver
@@ -30,8 +30,8 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.drp_19.TOGGLE_SLEEP" />
-                <action android:name="com.example.drp_19.REFRESH_WIDGET" />
+                <action android:name="io.github.deepsleep.TOGGLE_SLEEP" />
+                <action android:name="io.github.deepsleep.REFRESH_WIDGET" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -62,7 +62,7 @@
             android:name=".AppRefreshReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.example.drp_19.REFRESH_APP" />
+                <action android:name="io.github.deepsleep.REFRESH_APP" />
             </intent-filter>
         </receiver>
 
@@ -83,7 +83,7 @@
             <data android:mimeType="text/plain" />
         </intent>
         <intent>
-            <action android:name="com.example.drp_19.REFRESH_APP" />
+            <action android:name="io.github.deepsleep.REFRESH_APP" />
         </intent>
     </queries>
 </manifest>

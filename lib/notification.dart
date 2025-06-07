@@ -9,12 +9,12 @@ abstract class AppNotification {
       FlutterLocalNotificationsPlugin();
   static final NotificationDetails details = NotificationDetails(
     android: AndroidNotificationDetails(
-      'com.example.drp_19',
-      'com.example.drp_19',
-      channelDescription: 'com.example.drp_19',
+      'io.github.deepsleep',
+      'io.github.deepsleep',
+      channelDescription: 'io.github.deepsleep',
       importance: Importance.max,
       priority: Priority.high,
-      ticker: 'com.example.drp_19',
+      ticker: 'io.github.deepsleep',
     ),
   );
   static int id = 0;

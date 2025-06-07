@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:android_intent_plus/android_intent.dart';
-import 'package:drp_19/friend_page.dart';
-import 'package:drp_19/internet.dart';
-import 'package:drp_19/notification.dart';
-import 'package:drp_19/setting_page.dart';
-import 'package:drp_19/stat_page.dart';
+import 'package:deepsleep/friend_page.dart';
+import 'package:deepsleep/internet.dart';
+import 'package:deepsleep/notification.dart';
+import 'package:deepsleep/setting_page.dart';
+import 'package:deepsleep/stat_page.dart';
 import 'package:flutter/material.dart' hide Intent;
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -317,8 +317,8 @@ class _HomePageState extends State<HomePage>
   Future<void> _notifyDesktopWidget() async {
     if (Platform.isAndroid) {
       final AndroidIntent intent = AndroidIntent(
-        action: 'com.example.drp_19.REFRESH_WIDGET',
-        package: 'com.example.drp_19',
+        action: 'io.github.deepsleep.REFRESH_WIDGET',
+        package: 'io.github.deepsleep',
       );
       await intent.sendBroadcast();
     }
@@ -688,7 +688,7 @@ class _HomePageState extends State<HomePage>
     if (!Platform.isAndroid) {
       return;
     }
-    const channel = MethodChannel('com.example.drp_19/channel');
+    const channel = MethodChannel('io.github.deepsleep/channel');
 
     channel.setMethodCallHandler((call) async {
       if (call.method == 'onRefresh') {

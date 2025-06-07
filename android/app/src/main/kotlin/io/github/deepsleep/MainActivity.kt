@@ -1,4 +1,4 @@
-package com.example.drp_19
+package io.github.deepsleep
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

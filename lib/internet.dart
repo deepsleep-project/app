@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:drp_19/friend_request.dart';
+import 'package:deepsleep/friend_request.dart';
 import 'package:http/http.dart' as http;
 import 'friend.dart';
 

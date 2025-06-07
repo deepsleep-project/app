@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.drp_19"
+    namespace = "io.github.deepsleep"
     compileSdk = 35
     ndkVersion = "27.0.12077973"
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.drp_19"
+        applicationId = "io.github.deepsleep"
         minSdk = 21
         targetSdk = 35
         versionCode = flutter.versionCode
