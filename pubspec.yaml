@@ -35,6 +35,7 @@ flutter:
     - assets/night.png
     - assets/tent.png
     - assets/alarm.mp3
+    - assets/shop.png
   fonts:
     - family: Digital
       fonts:

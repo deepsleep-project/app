@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'tent_page.dart';
 import 'storage.dart';
 import 'statistic.dart';
+import 'shop_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -191,6 +192,22 @@ class _HomePageState extends State<HomePage>
     return PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) => SettingPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
+  }
+
+    // Navigate to setting_page
+  void _goToShopPage() {
+    Navigator.of(context).push(_createFadeRouteToShopPage());
+  }
+
+  // Create a fade transition route to the setting_page
+  Route _createFadeRouteToShopPage() {
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) => ShopPage(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
@@ -592,6 +609,15 @@ class _HomePageState extends State<HomePage>
                         onTap: _goToSettingPage,
                         child: Icon(
                           Icons.settings,
+                          size: 40,
+                          color: Colors.white.withAlpha(230),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.01),
+                      GestureDetector(
+                        onTap: _goToShopPage,
+                        child: Icon(
+                          Icons.shopping_cart,
                           size: 40,
                           color: Colors.white.withAlpha(230),
                         ),
