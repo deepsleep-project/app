@@ -41,7 +41,7 @@ class _TentPageState extends State<ShopPage> {
 
   //List<bool> _status = [true, true, true, true, true, true, true, true];
   //List<bool> _status = [false, false, false,false, false,false,false, false];
-  List<bool> _status = [];
+  List<bool> _status = [false, false, false,false, false,false,false, false];
 
   @override
   initState() {

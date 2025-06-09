@@ -325,6 +325,7 @@ class _HomePageState extends State<HomePage>
     setState(() {
       _isSleeping = false;
       _currency = goodSleep;
+
     });
 
     _notifyServer();
@@ -425,6 +426,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    _loadInitialSleepState();
     final screenHeight = MediaQuery.of(context).size.height;
     if (_isSleeping) {
       AppNotification.cancelTodaySleepReminder();
