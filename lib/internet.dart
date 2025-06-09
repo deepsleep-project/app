@@ -102,7 +102,7 @@ abstract class Internet {
       for (int i = 0; i < ids.length; i++) {
         String name = await fetchFriendName(ids[i]) ?? '';
         bool isAsleep = await getAsleep(ids[i]);
-        int strike1 = await strikefetch(ids[i]);
+        int strike1 = await streakFetch(ids[i]);
         result.add(
           FriendRecord(
             username: name,
@@ -142,7 +142,7 @@ abstract class Internet {
     }
   }
 
-  static Future<int> strikefetch(String friendUID) async {
+  static Future<int> streakFetch(String friendUID) async {
     final url = Uri.parse('$_serverURL/streak/get/$friendUID');
     final response = await http.get(url);
     if (response.statusCode == 200) {
@@ -152,7 +152,7 @@ abstract class Internet {
     }
   }
 
-  static Future<void> setstrike(String friendUID, int strike) async {
+  static Future<void> setStreak(String friendUID, int strike) async {
     final url = Uri.parse('$_serverURL/streak/set');
     await http.post(
       url,
@@ -177,5 +177,44 @@ abstract class Internet {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'uid': userUID}),
     );
+  }
+
+  static Future<void> setEnergy(String userUID, int energy) async {
+    final url = Uri.parse('$_serverURL/energy/change');
+    await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': userUID, 'energy': energy}),
+    );
+  }
+
+  static Future<int> fetchEnergy(String userUID) async {
+    final url = Uri.parse('$_serverURL/energy/get/$userUID');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as int;
+    } else {
+      return 0;
+    }
+  }
+
+  static Future<void> setItemPurchase(String userUID, int itemId) async {
+    final url = Uri.parse('$_serverURL/deco/buy');
+    await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': userUID, 'decoid': itemId}),
+    );
+  }
+
+  static Future<List<int>?> fetchPurchasedItems(String userUID) async {
+    final url = Uri.parse('$_serverURL/deco/get/$userUID');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.cast<int>();
+    } else {
+      return null;
+    }
   }
 }

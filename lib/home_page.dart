@@ -198,7 +198,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-    // Navigate to setting_page
+  // Navigate to setting_page
   void _goToShopPage() {
     Navigator.of(context).push(_createFadeRouteToShopPage());
   }
@@ -241,7 +241,7 @@ class _HomePageState extends State<HomePage>
       strike += 1;
     }
     SleepStorage.saveStreak(strike);
-    Internet.setstrike(_userId, strike);
+    Internet.setStreak(_userId, strike);
     return strike;
   }
 
@@ -249,14 +249,20 @@ class _HomePageState extends State<HomePage>
     bool timeout = false;
     if (_isSleeping && _userId.isNotEmpty) {
       await Internet.setAsleep(_userId).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 60),
         onTimeout: () {
           timeout = true;
         },
       );
     } else if (_userId.isNotEmpty) {
       await Internet.setAwake(_userId).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 60),
+        onTimeout: () {
+          timeout = true;
+        },
+      );
+      await Internet.setEnergy(_userId, _currency).timeout(
+        const Duration(seconds: 60),
         onTimeout: () {
           timeout = true;
         },
@@ -286,10 +292,6 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _endSleep() async {
-    if (!_isSleeping) {
-      _showSnackBar('not current sleeping');
-      return;
-    }
     final end = DateTime.now().toIso8601String();
     final start = await SleepStorage.loadStartTime();
 

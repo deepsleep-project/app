@@ -301,8 +301,10 @@ class _FriendPageState extends State<FriendPage> {
                 context,
               ).showSnackBar(SnackBar(content: Text('Error loging in')));
             } else {
+              final energy = await Internet.fetchEnergy(id ?? '');
               await SleepStorage.saveUsername(_username);
               await SleepStorage.saveUserId(_userId);
+              await SleepStorage.saveCurrency(energy);
             }
           } else if (newUsername != null && newUsername.isNotEmpty) {
             final id = await Internet.registerUser(newUsername);
