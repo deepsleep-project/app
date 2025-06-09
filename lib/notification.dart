@@ -95,6 +95,6 @@ abstract class AppNotification {
       }
     }
 
-    debugPrint('No alarm found for today.');
+    // debugPrint('No alarm found for today.');
   }
 }

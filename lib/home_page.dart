@@ -241,7 +241,6 @@ class _HomePageState extends State<HomePage>
       strike += 1;
     }
     SleepStorage.saveStreak(strike);
-    Internet.setStreak(_userId, strike);
     return strike;
   }
 
@@ -256,6 +255,12 @@ class _HomePageState extends State<HomePage>
       );
     } else if (_userId.isNotEmpty) {
       await Internet.setAwake(_userId).timeout(
+        const Duration(seconds: 60),
+        onTimeout: () {
+          timeout = true;
+        },
+      );
+      await Internet.setStreak(_userId, _sleepConsistantly).timeout(
         const Duration(seconds: 60),
         onTimeout: () {
           timeout = true;
@@ -308,8 +313,6 @@ class _HomePageState extends State<HomePage>
       goodSleep = _currency;
     }
 
-    await SleepStorage.saveCurrency(goodSleep);
-
     final date = getAdjustedDate(DateTime.parse(start)).toIso8601String();
 
     final records = await SleepStorage.loadRecords();
@@ -327,8 +330,10 @@ class _HomePageState extends State<HomePage>
     setState(() {
       _isSleeping = false;
       _currency = goodSleep;
-
+      // _currency += 500;
     });
+
+    await SleepStorage.saveCurrency(_currency);
 
     _notifyServer();
     _notifyDesktopWidget();

@@ -1,6 +1,7 @@
 import 'package:deepsleep/storage.dart';
 import 'package:flutter/material.dart';
 import 'shop_item.dart';
+
 class TentPage extends StatefulWidget {
   const TentPage({super.key});
 
@@ -9,8 +10,7 @@ class TentPage extends StatefulWidget {
 }
 
 class _TentPageState extends State<TentPage> {
-
-  List<bool> _status = [true,true,true,true,true,true,true,true];
+  List<int> _status = [];
 
   @override
   void initState() {
@@ -19,7 +19,7 @@ class _TentPageState extends State<TentPage> {
   }
 
   Future<void> _loadInitialSleepState() async {
-    List<bool> status= await SleepStorage.loadShopItemStates();
+    List<int> status = await SleepStorage.loadShopItemStates();
     setState(() {
       _status = status;
     });
@@ -41,7 +41,7 @@ class _TentPageState extends State<TentPage> {
 
         // Back button
         Positioned(
-          top: screenHeight * 0.08, 
+          top: screenHeight * 0.08,
           left: screenHeight * 0.03,
           child: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
@@ -54,7 +54,7 @@ class _TentPageState extends State<TentPage> {
           ),
         ),
         for (var item in items)
-          if (_status.length > item.id && _status[item.id])
+          if (_status.length > item.id && _status.contains(item.id))
             item.build(context),
       ],
     );

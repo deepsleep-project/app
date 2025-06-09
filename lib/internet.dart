@@ -180,7 +180,7 @@ abstract class Internet {
   }
 
   static Future<void> setEnergy(String userUID, int energy) async {
-    final url = Uri.parse('$_serverURL/energy/change');
+    final url = Uri.parse('$_serverURL/energy/set');
     await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

@@ -1,3 +1,4 @@
+import 'package:deepsleep/internet.dart';
 import 'package:deepsleep/storage.dart';
 import 'package:flutter/material.dart';
 import 'shop_item.dart';
@@ -16,32 +17,41 @@ class _TentPageState extends State<ShopPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-
-  void _tryToBuy(ShopItem item) {
-    if (_status[item.id - 1]) {
-      _showSnackBar('Already bought this one');
+  void _tryToBuy(ShopItem item) async {
+    if (_status.contains(item.id)) {
+      _showSnackBar('You already bought this item');
       return;
     } else {
       if (_currency < item.price) {
-        _showSnackBar('Not enough currency');
+        _showSnackBar('You do not have enough energy');
       } else {
+        bool timeout = false;
+        await Internet.setItemPurchase(_userId, item.id).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () async {
+            timeout = true;
+            return;
+          },
+        );
+        if (timeout) {
+          _showSnackBar('Connection failed. Please try again.');
+          return;
+        }
+
         setState(() {
           _currency -= item.price;
-          _status[item.id - 1] = true;
+          _status.add(item.id);
         });
         SleepStorage.saveCurrency(_currency);
         SleepStorage.saveShopItemStates(_status);
-        _showSnackBar('Successfully bought');
+        _showSnackBar('Successfully bought ${item.name}');
       }
     }
   }
 
-
+  String _userId = '';
   int _currency = 0;
-
-  //List<bool> _status = [true, true, true, true, true, true, true, true];
-  //List<bool> _status = [false, false, false,false, false,false,false, false];
-  List<bool> _status = [false, false, false,false, false,false,false, false];
+  List<int> _status = [];
 
   @override
   initState() {
@@ -51,85 +61,85 @@ class _TentPageState extends State<ShopPage> {
 
   Future<void> _loadInitialSleepState() async {
     super.initState();
+    String userId = await SleepStorage.loadUserId();
     int currency = await SleepStorage.loadCurrency();
-    List<bool> status= await SleepStorage.loadShopItemStates();
+    List<int> status = await SleepStorage.loadShopItemStates();
     setState(() {
+      _userId = userId;
       _status = status;
       _currency = currency;
     });
   }
 
-  
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: Stack(
-      children: [
-        // Background image
-        Image.asset(
-          'assets/shop.png',
-          fit: BoxFit.cover,
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-        ),
+        children: [
+          // Background image
+          Image.asset(
+            'assets/shop.png',
+            fit: BoxFit.cover,
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+          ),
 
-        // Back button
-        Positioned(
-          top: screenHeight * 0.08,
-          left: screenHeight * 0.03,
-          child: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
-            onPressed: () => Navigator.pop(context),
-            tooltip: 'Back',
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.black45,
-              shape: CircleBorder(),
+          // Back button
+          Positioned(
+            top: screenHeight * 0.07,
+            left: screenHeight * 0.03,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
+              onPressed: () => Navigator.pop(context),
+              tooltip: 'Back',
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black45,
+                shape: CircleBorder(),
+              ),
             ),
           ),
-        ),
-        Positioned(
-          top: screenHeight * 0.23,
-          left: screenHeight * 0.08,
-          child: Column(
-            children: [
-              Row(
-                spacing: screenHeight * 0.05,
-                children: [
-                  _buildItemViews(items[0]),
-                  _buildItemViews(items[1]),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.015),
-              Row(
-                spacing: screenHeight * 0.05,
-                children: [
-                  _buildItemViews(items[2]),
-                  _buildItemViews(items[3]),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.015),
-              Row(
-                spacing: screenHeight * 0.05,
-                children: [
-                  _buildItemViews(items[4]),
-                  _buildItemViews(items[5]),
-                ],
-              ),
-              SizedBox(height: screenHeight * 0.003),
-              Row(
-                spacing: screenHeight * 0.05,
-                children: [
-                  _buildItemViews(items[6]),
-                  _buildItemViews(items[7]),
-                ],
-              ),
-            ],
+          Positioned(
+            top: screenHeight * 0.225,
+            left: screenHeight * 0.08,
+            child: Column(
+              children: [
+                Row(
+                  spacing: screenHeight * 0.05,
+                  children: [
+                    _buildItemViews(items[0]),
+                    _buildItemViews(items[1]),
+                  ],
+                ),
+                SizedBox(height: screenHeight * 0.015),
+                Row(
+                  spacing: screenHeight * 0.05,
+                  children: [
+                    _buildItemViews(items[2]),
+                    _buildItemViews(items[3]),
+                  ],
+                ),
+                SizedBox(height: screenHeight * 0.008),
+                Row(
+                  spacing: screenHeight * 0.05,
+                  children: [
+                    _buildItemViews(items[4]),
+                    _buildItemViews(items[5]),
+                  ],
+                ),
+                Row(
+                  spacing: screenHeight * 0.05,
+                  children: [
+                    _buildItemViews(items[6]),
+                    _buildItemViews(items[7]),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 
@@ -153,7 +163,7 @@ class _TentPageState extends State<ShopPage> {
             ),
           ),
           Text(
-            _status[item.id - 1] ?  "Already Bought" : '${item.price}' ,
+            _status.contains(item.id) ? "Already Bought" : '${item.price}',
             style: const TextStyle(
               fontSize: 10,
               color: Colors.white,
@@ -163,6 +173,5 @@ class _TentPageState extends State<ShopPage> {
         ],
       ),
     );
-    
   }
 }
