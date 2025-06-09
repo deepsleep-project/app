@@ -65,6 +65,11 @@ abstract class AppNotification {
 
   static void initializeAlarmListener() {
     Alarm.scheduled.listen((alarmSet) {
+      if (alarmSet.alarms.isEmpty) {
+        debugPrint("Received an alarmSet with no alarms.");
+        return;
+      }
+
       final alarmSettings = alarmSet.alarms.first;
       debugPrint("Alarm ringing: ${alarmSettings.id}");
 

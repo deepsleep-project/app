@@ -77,7 +77,7 @@ class _FriendPageState extends State<FriendPage> {
       try {
         requests =
             await Internet.fetchFriendRequest(userId).timeout(
-              const Duration(seconds: 10),
+              const Duration(seconds: 60),
               onTimeout: () {
                 timeout = true;
                 return [];
@@ -93,7 +93,7 @@ class _FriendPageState extends State<FriendPage> {
       try {
         friends =
             await Internet.getFriendList(userId).timeout(
-              const Duration(seconds: 10),
+              const Duration(seconds: 60),
               onTimeout: () {
                 timeout = true;
                 return [];
@@ -224,15 +224,17 @@ class _FriendPageState extends State<FriendPage> {
                       ],
                     ),
                   ),
-                  FriendRequestList(
-                    userId: _userId,
-                    friendRequests: _friendRequests,
-                  ),
-                  FriendList(
-                    friends: _friends,
-                    // friends: _exampleFriends.toList()
-                    //   ..sort((a, b) => b.streak.compareTo(a.streak)),
-                  ),
+                  if (_userId.isNotEmpty) ...[
+                    FriendRequestList(
+                      userId: _userId,
+                      friendRequests: _friendRequests,
+                    ),
+                    FriendList(
+                      friends: _friends,
+                      // friends: _exampleFriends.toList()
+                      //   ..sort((a, b) => b.streak.compareTo(a.streak)),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -286,8 +288,24 @@ class _FriendPageState extends State<FriendPage> {
               );
             },
           );
-          if (newUsername != null && newUsername.isNotEmpty) {
-            final id = await Internet.fetchUid(newUsername);
+          if (newUsername != null && newUsername.startsWith('login@')) {
+            String actualUsername = newUsername.substring(6);
+            final id = await Internet.fetchUserUID(actualUsername);
+            setState(() {
+              _username = actualUsername;
+              _userId = id ?? '';
+            });
+
+            if (_userId.isEmpty && mounted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Error loging in')));
+            } else {
+              await SleepStorage.saveUsername(_username);
+              await SleepStorage.saveUserId(_userId);
+            }
+          } else if (newUsername != null && newUsername.isNotEmpty) {
+            final id = await Internet.registerUser(newUsername);
             setState(() {
               _username = newUsername;
               _userId = id ?? '';

@@ -3,11 +3,12 @@ import 'package:deepsleep/friend_request.dart';
 import 'package:http/http.dart' as http;
 import 'friend.dart';
 
+// final String _serverURL = 'https://deepsleep.onrender.com';
 final String _serverURL = 'http://146.169.26.221:3000';
 
 abstract class Internet {
   // Register a new user and return their UID
-  static Future<String?> fetchUid(String username) async {
+  static Future<String?> registerUser(String username) async {
     final url = Uri.parse('$_serverURL/user/register');
 
     final response = await http.post(
@@ -19,6 +20,17 @@ abstract class Internet {
     if (response.statusCode == 200) {
       final data = response.body;
       return data;
+    } else {
+      return null;
+    }
+  }
+
+  static Future<String?> fetchUserUID(String username) async {
+    final url = Uri.parse('$_serverURL/user/$username');
+
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return response.body;
     } else {
       return null;
     }
