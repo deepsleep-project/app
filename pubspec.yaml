@@ -41,6 +41,10 @@ flutter:
     - assets/items/chair.png
     - assets/items/clock.png
     - assets/items/lamp.png
+    - assets/items/books.png
+    - assets/items/duck.png
+    - assets/items/plant.png
+    - assets/items/painting.png
   fonts:
     - family: Digital
       fonts:

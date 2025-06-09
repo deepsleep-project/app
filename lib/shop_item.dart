@@ -32,13 +32,13 @@ class ShopItem {
 }
 
 final items = [
-  ShopItem(id: 1,name: '1',imagepath: 'assets/logo.jpg',price: 100,x: 0.1,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 2,name: '2',imagepath: 'assets/logo.jpg',price: 100,x: 0.2,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 3,name: '3',imagepath: 'assets/logo.jpg',price: 100,x: 0.3,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 4,name: '4',imagepath: 'assets/logo.jpg',price: 100,x: 0.4,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 5,name: '5',imagepath: 'assets/logo.jpg',price: 100,x: 0.5,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 6,name: '6',imagepath: 'assets/logo.jpg',price: 100,x: 0.6,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 7,name: '7',imagepath: 'assets/logo.jpg',price: 100,x: 0.7,y: 0.1,w: 30, h: 30),
-  ShopItem(id: 8,name: '8',imagepath: 'assets/logo.jpg',price: 100,x: 0.8,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 1,name: '1',imagepath: 'assets/items/campbag.png',price: 100,x: 0.1,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 2,name: '2',imagepath: 'assets/items/chair.png',price: 100,x: 0.2,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 3,name: '3',imagepath: 'assets/items/clock.png',price: 100,x: 0.3,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 4,name: '4',imagepath: 'assets/items/lamp.png',price: 100,x: 0.4,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 5,name: '5',imagepath: 'assets/items/books.png',price: 100,x: 0.5,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 6,name: '6',imagepath: 'assets/items/duck.png',price: 100,x: 0.6,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 7,name: '7',imagepath: 'assets/items/plant.png',price: 100,x: 0.7,y: 0.1,w: 30, h: 30),
+  ShopItem(id: 8,name: '8',imagepath: 'assets/items/painting.png',price: 100,x: 0.8,y: 0.1,w: 30, h: 30),
 ];
 
