@@ -10,14 +10,14 @@ class ShopPage extends StatefulWidget {
 }
 
 class _TentPageState extends State<ShopPage> {
-
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void _trytobuy(ShopItem item) {
+  void _tryToBuy(ShopItem item) {
+    _showSnackBar('Trying to buy ${item.name}');
     if (_status[item.id - 1]) {
       _showSnackBar('Already bought this on');
       return;
@@ -30,16 +30,15 @@ class _TentPageState extends State<ShopPage> {
         SleepStorage.saveShopItemStates(_status);
         _showSnackBar('Succesfully buy');
       }
-
     }
   }
 
   int _currency = 0;
 
-  List<bool> _status = [true,true,true,true,true,true,true,true];
+  List<bool> _status = [true, true, true, true, true, true, true, true];
 
   @override
-  initState()  {
+  initState() {
     super.initState();
     _loadInitialSleepState();
   }
@@ -53,7 +52,7 @@ class _TentPageState extends State<ShopPage> {
       _currency = currency;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -70,7 +69,7 @@ class _TentPageState extends State<ShopPage> {
 
         // Back button
         Positioned(
-          top: screenHeight * 0.08, // adjust for padding/status bar
+          top: screenHeight * 0.08,
           left: screenHeight * 0.03,
           child: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
@@ -82,50 +81,78 @@ class _TentPageState extends State<ShopPage> {
             ),
           ),
         ),
-       Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          children: items.map((item) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    _trytobuy(item);
-                  },
-                  child: Image.asset(
-                    item.imagepath,
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  item.name.isNotEmpty ? item.name : 'No Name',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                Text(
-                  '\$${item.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
+        Positioned(
+          top: screenHeight * 0.23,
+          left: screenHeight * 0.08,
+          child: Column(
+            children: [
+              Row(
+                spacing: screenHeight * 0.05,
+                children: [
+                  _buildItemViews(items[0]),
+                  _buildItemViews(items[1]),
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.015),
+              Row(
+                spacing: screenHeight * 0.05,
+                children: [
+                  _buildItemViews(items[2]),
+                  _buildItemViews(items[3]),
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.015),
+              Row(
+                spacing: screenHeight * 0.05,
+                children: [
+                  _buildItemViews(items[4]),
+                  _buildItemViews(items[5]),
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.003),
+              Row(
+                spacing: screenHeight * 0.05,
+                children: [
+                  _buildItemViews(items[6]),
+                  _buildItemViews(items[7]),
+                ],
+              ),
+            ],
+          ),
         ),
-      )
       ],
+    );
+  }
+
+  _buildItemViews(ShopItem item) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return GestureDetector(
+      onTap: () => _tryToBuy(item),
+      child: Column(
+        children: [
+          Image.asset(
+            item.imagepath,
+            width: screenHeight * 0.13,
+            height: screenHeight * 0.13,
+          ),
+          Text(
+            item.name,
+            style: const TextStyle(
+              fontSize: 10,
+              color: Colors.white,
+              decoration: TextDecoration.none,
+            ),
+          ),
+          Text(
+            '${item.price}',
+            style: const TextStyle(
+              fontSize: 10,
+              color: Colors.white,
+              decoration: TextDecoration.none,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
