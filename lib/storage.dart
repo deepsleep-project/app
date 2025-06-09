@@ -113,7 +113,7 @@ class SleepStorage {
 
   static Future<List<bool>> loadShopItemStates() async {
     final stringList = (await pref).getStringList('shop_item_states');
-    return stringList?.map((s) => s == 'true').toList() ?? [];
+    return stringList?.map((s) => s == 'true').toList() ?? [false,false,false,false,false,false,false,false];
   }
 
   static Future<List<SleepRecord>> loadRecords() async {

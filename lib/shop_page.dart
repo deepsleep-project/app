@@ -16,26 +16,32 @@ class _TentPageState extends State<ShopPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+
   void _tryToBuy(ShopItem item) {
-    _showSnackBar('Trying to buy ${item.name}');
     if (_status[item.id - 1]) {
-      _showSnackBar('Already bought this on');
+      _showSnackBar('Already bought this one');
       return;
     } else {
       if (_currency < item.price) {
         _showSnackBar('Not enough currency');
       } else {
-        SleepStorage.saveCurrency(_currency - item.price);
-        _status[item.id - 1] = true;
+        setState(() {
+          _currency -= item.price;
+          _status[item.id - 1] = true;
+        });
+        SleepStorage.saveCurrency(_currency);
         SleepStorage.saveShopItemStates(_status);
-        _showSnackBar('Succesfully buy');
+        _showSnackBar('Successfully bought');
       }
     }
   }
 
+
   int _currency = 0;
 
-  List<bool> _status = [true, true, true, true, true, true, true, true];
+  //List<bool> _status = [true, true, true, true, true, true, true, true];
+  //List<bool> _status = [false, false, false,false, false,false,false, false];
+  List<bool> _status = [false, false, false,false, false,false,false, false];
 
   @override
   initState() {
@@ -46,18 +52,20 @@ class _TentPageState extends State<ShopPage> {
   Future<void> _loadInitialSleepState() async {
     super.initState();
     int currency = await SleepStorage.loadCurrency();
-    //List<bool> status= await SleepStorage.loadShopItemStates();
+    List<bool> status= await SleepStorage.loadShopItemStates();
     setState(() {
-      //_status = status;
+      _status = status;
       _currency = currency;
     });
   }
 
+  
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Stack(
+    return Scaffold(
+      body: Stack(
       children: [
         // Background image
         Image.asset(
@@ -121,6 +129,7 @@ class _TentPageState extends State<ShopPage> {
           ),
         ),
       ],
+    ),
     );
   }
 
@@ -144,7 +153,7 @@ class _TentPageState extends State<ShopPage> {
             ),
           ),
           Text(
-            '${item.price}',
+            _status[item.id - 1] ?  "Already Bought" : '${item.price}' ,
             style: const TextStyle(
               fontSize: 10,
               color: Colors.white,
@@ -154,5 +163,6 @@ class _TentPageState extends State<ShopPage> {
         ],
       ),
     );
+    
   }
 }
