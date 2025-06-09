@@ -35,6 +35,7 @@ class SleepRecord {
   }
 }
 
+
 class SleepStorage {
   static Future<SharedPreferences> get pref async =>
       await SharedPreferences.getInstance();
@@ -103,6 +104,16 @@ class SleepStorage {
 
   static Future<String> loadUserId() async {
     return (await pref).getString('userId') ?? '';
+  }
+
+  static Future<void> saveShopItemStates(List<bool> states) async {
+    final stringList = states.map((b) => b.toString()).toList();
+    await (await pref).setStringList('shop_item_states', stringList);
+  }
+
+  static Future<List<bool>> loadShopItemStates() async {
+    final stringList = (await pref).getStringList('shop_item_states');
+    return stringList?.map((s) => s == 'true').toList() ?? [];
   }
 
   static Future<List<SleepRecord>> loadRecords() async {
