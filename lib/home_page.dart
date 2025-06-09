@@ -746,6 +746,6 @@ class DayNightImage extends StatelessWidget {
       imagePath = 'assets/sunset.png';
     }
 
-    return Image.asset(imagePath, fit: BoxFit.fitHeight, height: screenHeight);
+    return Image.asset(imagePath, fit: BoxFit.fill, height: screenHeight);
   }
 }
