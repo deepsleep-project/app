@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage>
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
   late AnimationController _controller;
+  final PageController _pageController = PageController();
   // late Animation<double> _animation;
 
   // Example sleep records with varied times
@@ -138,6 +139,7 @@ class _HomePageState extends State<HomePage>
   @override
   void dispose() {
     _controller.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -527,6 +529,7 @@ class _HomePageState extends State<HomePage>
       key: ValueKey('awake'),
       body: Scaffold(
         body: PageView(
+          controller: _pageController,
           scrollDirection: Axis.vertical,
           physics: const ClampingScrollPhysics(),
           children: [
@@ -646,7 +649,7 @@ class _HomePageState extends State<HomePage>
                     child: Container(color: Colors.transparent),
                   ),
                 ),
-
+              
                 // Text "statistics" at bottom
                 Positioned(
                   bottom: screenHeight * 0.03,
@@ -671,6 +674,26 @@ class _HomePageState extends State<HomePage>
                       ),
                     ],
                   ),
+                ),
+                                // Invisible button to navigate to statistic
+                Positioned(
+                  bottom: screenHeight * 0.03,
+                  left: screenHeight * 0.15,
+                  right: screenHeight * 0.15,
+                  height: screenHeight * 0.1,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                          _pageController.animateToPage(
+                            1,
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                      child: Container(decoration: BoxDecoration(border: Border.all(color: const Color.fromARGB(0, 0, 0, 0)),
+                    ),
+                  ),
+                    ),
                 ),
               ],
             ),
