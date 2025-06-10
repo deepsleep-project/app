@@ -15,13 +15,14 @@ class _TentPageState extends State<TentPage> {
   @override
   void initState() {
     super.initState();
-    //_loadInitialSleepState();
+    _loadInitialSleepState();
   }
 
   Future<void> _loadInitialSleepState() async {
     List<int> status = await SleepStorage.loadShopItemStates();
     setState(() {
       _status = status;
+      // _status = [1, 3, 4, 5, 6, 7, 8];
     });
   }
 
@@ -34,7 +35,7 @@ class _TentPageState extends State<TentPage> {
         // Background image
         Image.asset(
           'assets/tent.png',
-          fit: BoxFit.cover,
+          fit: BoxFit.fill,
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
         ),
@@ -53,8 +54,9 @@ class _TentPageState extends State<TentPage> {
             ),
           ),
         ),
+
         for (var item in items)
-          if (_status.length > item.id && _status.contains(item.id))
+          if (_status.contains(item.id) && item.name != 'chair')
             item.build(context),
       ],
     );
