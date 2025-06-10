@@ -235,15 +235,15 @@ class _HomePageState extends State<HomePage>
   }
 
   int _calculateStreak(List<SleepRecord> records) {
-    int strike = 0;
+    int streak = 0;
     for (int i = 0; i < records.length; i++) {
       if (!records[i].sleepRecordState) {
         break;
       }
-      strike += 1;
+      streak += 1;
     }
-    SleepStorage.saveStreak(strike);
-    return strike;
+    SleepStorage.saveStreak(streak);
+    return streak;
   }
 
   Future<void> _notifyServer() async {
