@@ -103,12 +103,14 @@ abstract class Internet {
         String name = await fetchFriendName(ids[i]) ?? '';
         bool isAsleep = await getAsleep(ids[i]);
         int strike1 = await streakFetch(ids[i]);
+        List<int> friendtent = await fetchPurchasedItems(ids[i]) ?? [];
         result.add(
           FriendRecord(
             username: name,
             userId: ids[i],
             isAsleep: isAsleep,
             streak: strike1,
+            friendTent: friendtent
           ),
         );
       }

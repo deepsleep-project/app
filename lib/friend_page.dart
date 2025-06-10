@@ -3,6 +3,7 @@ import 'package:deepsleep/storage.dart';
 import 'package:flutter/material.dart';
 import 'internet.dart';
 import 'friend.dart';
+import 'friend_tent.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -131,12 +132,15 @@ class _FriendPageState extends State<FriendPage> {
   void sortFriend(List<FriendRecord> list) async {
     bool isasleep = await SleepStorage.loadIsSleeping();
     int streak1 = await SleepStorage.loadStreak();
+    List<int> tentitem = await SleepStorage.loadShopItemStates();
+    
     list.add(
       FriendRecord(
         username: _username,
         userId: _userId,
         isAsleep: isasleep,
         streak: streak1,
+        friendTent: tentitem
       ),
     );
     list.sort((a, b) => b.streak.compareTo(a.streak));
@@ -523,6 +527,27 @@ class FriendList extends StatefulWidget {
 }
 
 class _FriendListState extends State<FriendList> {
+  // Navigate to tent_page
+  void _enterfriendtent(FriendRecord friend) {
+    print(friend.username);
+    print(friend.friendTent);
+    Navigator.of(context).push(_createFadeRouteToTentPage(friend));
+  }
+
+  // Create a fade transition route to the tent_page
+  Route _createFadeRouteToTentPage(FriendRecord friend) {
+    print(friend.username);
+    print(friend.friendTent);
+    return PageRouteBuilder(
+      transitionDuration: Duration(milliseconds: 500),
+      pageBuilder: (context, animation, secondaryAnimation) => FriendTentPage(friend: friend),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -555,7 +580,11 @@ class _FriendListState extends State<FriendList> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
           ),
-          child: Row(
+          
+          child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _enterfriendtent(friend),
+                      child: Row(
             children: [
               rankIcon,
               SizedBox(width: 12),
@@ -594,6 +623,7 @@ class _FriendListState extends State<FriendList> {
               ),
             ],
           ),
+        ),
         );
       }).toList(),
     );
