@@ -74,6 +74,7 @@ class _TentPageState extends State<ShopPage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: Stack(
@@ -97,6 +98,28 @@ class _TentPageState extends State<ShopPage> {
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black45,
                 shape: CircleBorder(),
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: screenHeight * 0.07,
+            left: screenWidth * 0.73,
+            child: SizedBox(
+              width: 250,
+              height: 55,
+              child: Row(
+                children: [
+                  Icon(Icons.bolt, size: 30, color: Colors.yellow),
+                  Text(
+                    _currency.toString(),
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
