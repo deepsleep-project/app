@@ -27,35 +27,35 @@ class StatPage extends StatelessWidget {
   //     date: DateTime.utc(2025, 6, 4, 0, 0).toIso8601String(),
   //     sleepRecordState: true,
   //   ),
-  //   // Wednesday, June 5, 2025
+  //   // Thursday, June 5, 2025
   //   SleepRecord(
   //     start: DateTime.utc(2025, 6, 5, 21, 27).toIso8601String(),
   //     end: DateTime.utc(2025, 6, 6, 7, 18).toIso8601String(),
   //     date: DateTime.utc(2025, 6, 5, 0, 0).toIso8601String(),
   //     sleepRecordState: true,
   //   ),
-  //   // Thursday, June 6, 2025
+  //   // Friday, June 6, 2025
   //   SleepRecord(
   //     start: DateTime.utc(2025, 6, 6, 22, 45).toIso8601String(),
   //     end: DateTime.utc(2025, 6, 7, 7, 54).toIso8601String(),
   //     date: DateTime.utc(2025, 6, 6, 0, 0).toIso8601String(),
   //     sleepRecordState: true,
   //   ),
-  //   // Friday, June 7, 2025
+  //   // Saturday, June 7, 2025
   //   SleepRecord(
   //     start: DateTime.utc(2025, 6, 7, 23, 09).toIso8601String(),
   //     end: DateTime.utc(2025, 6, 8, 8, 12).toIso8601String(),
   //     date: DateTime.utc(2025, 6, 7, 0, 0).toIso8601String(),
   //     sleepRecordState: true,
   //   ),
-  //   // Saturday, June 8, 2025
+  //   // Sunday, June 8, 2025
   //   SleepRecord(
   //     start: DateTime.utc(2025, 6, 9, 1, 27).toIso8601String(),
   //     end: DateTime.utc(2025, 6, 9, 7, 36).toIso8601String(),
   //     date: DateTime.utc(2025, 6, 8, 0, 0).toIso8601String(),
   //     sleepRecordState: false,
   //   ),
-  //   // Sunday, June 9, 2025
+  //   // Monday, June 9, 2025
   //   SleepRecord(
   //     start: DateTime.utc(2025, 6, 9, 21, 58).toIso8601String(),
   //     end: DateTime.utc(2025, 6, 10, 6, 43).toIso8601String(),
@@ -349,33 +349,40 @@ class SleepChart extends StatelessWidget {
     for (int i = 0; i < days.length; i++) {
       final day = days[i];
       final record = recordMap[day];
-      if (record == null) continue;
 
-      final start = DateTime.parse(record.start);
-      final end = DateTime.parse(record.end);
+      BarChartRodData? rod;
 
-      final base = DateTime.utc(day.year, day.month, day.day, 20); // 8:00 PM
-      final startDiff = start.difference(base).inMinutes / 60;
-      final endDiff = end.difference(base).inMinutes / 60;
+      if (record != null) {
+        final start = DateTime.parse(record.start);
+        final end = DateTime.parse(record.end);
+
+        final base = DateTime.utc(day.year, day.month, day.day, 20); // 8:00 PM
+        final startDiff = start.difference(base).inMinutes / 60;
+        final endDiff = end.difference(base).inMinutes / 60;
+
+        rod = BarChartRodData(
+          fromY: startDiff,
+          toY: endDiff,
+          width: screenHeight * 0.03,
+          gradient: LinearGradient(
+            colors: record.sleepRecordState
+                ? gradientColorHealthy
+                : gradientColorUnHealthy,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        );
+      }
 
       barGroups.add(
         BarChartGroupData(
           x: i,
-          barRods: [
-            BarChartRodData(
-              fromY: startDiff,
-              toY: endDiff,
-              width: screenHeight * 0.03,
-              gradient: LinearGradient(
-                colors: record.sleepRecordState
-                    ? gradientColorHealthy
-                    : gradientColorUnHealthy,
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(5),
-            ),
-          ],
+          barRods: rod != null
+              ? [rod]
+              : [
+                  BarChartRodData(fromY: 0, toY: 0, width: screenHeight * 0.03),
+                ], // add empty list if no record
         ),
       );
     }
