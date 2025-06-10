@@ -31,78 +31,11 @@ class _HomePageState extends State<HomePage>
   int _sleepConsistantly = 0;
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
-  late AnimationController _controller;
-  // late Animation<double> _animation;
-
-  // Example sleep records with varied times
-  // final List<SleepRecord> _exampleRecords = [
-  //   // Wednesday, May 28, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 5, 28, 21, 27).toIso8601String(),
-  //     end: DateTime.utc(2025, 5, 29, 7, 18).toIso8601String(),
-  //     date: DateTime.utc(2025, 5, 28, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  //   // Thursday, May 29, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 5, 29, 22, 45).toIso8601String(),
-  //     end: DateTime.utc(2025, 5, 30, 7, 54).toIso8601String(),
-  //     date: DateTime.utc(2025, 5, 29, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  //   // Friday, May 30, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 5, 30, 23, 09).toIso8601String(),
-  //     end: DateTime.utc(2025, 5, 31, 8, 12).toIso8601String(),
-  //     date: DateTime.utc(2025, 5, 30, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  //   // Saturday, May 31, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 6, 1, 1, 27).toIso8601String(),
-  //     end: DateTime.utc(2025, 6, 1, 7, 36).toIso8601String(),
-  //     date: DateTime.utc(2025, 5, 31, 0, 0).toIso8601String(),
-  //     sleepRecordState: false,
-  //   ),
-  //   // Sunday, June 1, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 6, 1, 21, 58).toIso8601String(),
-  //     end: DateTime.utc(2025, 6, 2, 6, 43).toIso8601String(),
-  //     date: DateTime.utc(2025, 6, 1, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  //   // Monday, June 2, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 6, 2, 23, 02).toIso8601String(),
-  //     end: DateTime.utc(2025, 6, 3, 7, 00).toIso8601String(),
-  //     date: DateTime.utc(2025, 6, 2, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  //   // Tuesday, June 3, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 6, 3, 22, 52).toIso8601String(),
-  //     end: DateTime.utc(2025, 6, 4, 7, 20).toIso8601String(),
-  //     date: DateTime.utc(2025, 6, 3, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  //   // Wednesday, June 4, 2025
-  //   SleepRecord(
-  //     start: DateTime.utc(2025, 6, 5, 1, 15).toIso8601String(),
-  //     end: DateTime.utc(2025, 6, 5, 7, 30).toIso8601String(),
-  //     date: DateTime.utc(2025, 6, 4, 0, 0).toIso8601String(),
-  //     sleepRecordState: true,
-  //   ),
-  // ];
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    // _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _controller.forward();
     _updateTime();
     // Update the time every second
     Timer.periodic(Duration(seconds: 1), (timer) {
@@ -135,19 +68,11 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   // Update and format the current time
   void _updateTime() {
     final now = DateTime.now();
     final formatter = DateFormat('HH:mm');
-    setState(() {
-      _formattedTime = formatter.format(now);
-    });
+    setState(() => _formattedTime = formatter.format(now));
   }
 
   // Navigate to tent_page
@@ -156,15 +81,12 @@ class _HomePageState extends State<HomePage>
   }
 
   // Create a fade transition route to the tent_page
-  Route _createFadeRouteToTentPage() {
-    return PageRouteBuilder(
-      transitionDuration: Duration(milliseconds: 500),
-      pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-    );
-  }
+  Route _createFadeRouteToTentPage() => PageRouteBuilder(
+    transitionDuration: Duration(milliseconds: 500),
+    pageBuilder: (context, animation, secondaryAnimation) => TentPage(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        FadeTransition(opacity: animation, child: child),
+  );
 
   // Navigate to friend_page
   void _goToFriendPage() {
@@ -172,15 +94,12 @@ class _HomePageState extends State<HomePage>
   }
 
   // Create a fade transition route to the friend_page
-  Route _createFadeRouteToFriendPage() {
-    return PageRouteBuilder(
-      transitionDuration: Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) => FriendPage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-    );
-  }
+  Route _createFadeRouteToFriendPage() => PageRouteBuilder(
+    transitionDuration: Duration(milliseconds: 250),
+    pageBuilder: (context, animation, secondaryAnimation) => FriendPage(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        FadeTransition(opacity: animation, child: child),
+  );
 
   // Navigate to setting_page
   void _goToSettingPage() {
@@ -282,21 +201,21 @@ class _HomePageState extends State<HomePage>
 
   Future<void> _startSleep() async {
     if (_isSleeping) {
-      _showSnackBar('already asleep');
       return;
     }
     final now = DateTime.now().toIso8601String();
     await SleepStorage.saveStartTime(now);
     await SleepStorage.saveIsSleeping(true);
-    setState(() {
-      _isSleeping = true;
-    });
+    setState(() => _isSleeping = true);
 
     _notifyServer();
     _notifyDesktopWidget();
   }
 
   Future<void> _endSleep() async {
+    if (!_isSleeping) {
+      return;
+    }
     final end = DateTime.now().toIso8601String();
     final start = await SleepStorage.loadStartTime();
 
@@ -439,6 +358,9 @@ class _HomePageState extends State<HomePage>
       AppNotification.cancelTodaySleepReminder();
     }
     return AnimatedSwitcher(
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
       duration: const Duration(milliseconds: 800),
       switchInCurve: Curves.easeIn,
       switchOutCurve: Curves.easeOut,
@@ -450,7 +372,7 @@ class _HomePageState extends State<HomePage>
 
   Widget _buildSleepingView(double screenHeight) {
     return Scaffold(
-      key: ValueKey('sleeping'),
+      key: ValueKey("asleep"),
       body: PageView(
         scrollDirection: Axis.vertical,
         physics: _isSleeping
@@ -524,9 +446,10 @@ class _HomePageState extends State<HomePage>
 
   Widget _buildAwakeView(double screenHeight) {
     return Scaffold(
-      key: ValueKey('awake'),
+      key: ValueKey("awake"),
       body: Scaffold(
         body: PageView(
+          controller: _pageController,
           scrollDirection: Axis.vertical,
           physics: const ClampingScrollPhysics(),
           children: [
@@ -670,6 +593,30 @@ class _HomePageState extends State<HomePage>
                         size: 50,
                       ),
                     ],
+                  ),
+                ),
+                // Invisible button to navigate to statistic
+                Positioned(
+                  bottom: screenHeight * 0.03,
+                  left: screenHeight * 0.15,
+                  right: screenHeight * 0.15,
+                  height: screenHeight * 0.1,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      _pageController.animateToPage(
+                        1,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color.fromARGB(0, 0, 0, 0),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
