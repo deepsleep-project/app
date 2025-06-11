@@ -14,6 +14,7 @@ import 'tent_page.dart';
 import 'storage.dart';
 import 'statistic.dart';
 import 'shop_page.dart';
+import 'sleeptracker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,10 +33,11 @@ class _HomePageState extends State<HomePage>
   DateTime _start = DateTime(0);
   DateTime _end = DateTime(0);
   final PageController _pageController = PageController();
-
+  late SleepTracker sleepTracker;
   @override
   void initState() {
     super.initState();
+    sleepTracker = SleepTracker(onSleepCancelled: _handleSleepCancelled);
     _updateTime();
     // Update the time every second
     Timer.periodic(Duration(seconds: 1), (timer) {
@@ -67,6 +69,11 @@ class _HomePageState extends State<HomePage>
       payload: 'item x',
     );
   }
+  void _handleSleepCancelled() {
+    _showSnackBar('you leave the app');
+    _endSleep();
+  }
+
 
   // Update and format the current time
   void _updateTime() {
@@ -132,7 +139,12 @@ class _HomePageState extends State<HomePage>
       },
     );
   }
-
+  
+  @override
+  void dispose() {
+    sleepTracker.stop();
+    super.dispose();
+  }
   // Load the initial sleep state from storage
   Future<void> _loadInitialSleepState() async {
     String id = await SleepStorage.loadUserId();
@@ -206,6 +218,7 @@ class _HomePageState extends State<HomePage>
     final now = DateTime.now().toIso8601String();
     await SleepStorage.saveStartTime(now);
     await SleepStorage.saveIsSleeping(true);
+    sleepTracker.start();
     setState(() => _isSleeping = true);
 
     _notifyServer();
@@ -245,6 +258,7 @@ class _HomePageState extends State<HomePage>
     );
     await SleepStorage.saveRecords(records);
     await SleepStorage.saveIsSleeping(false);
+    sleepTracker.stop();
 
     setState(() {
       _isSleeping = false;

@@ -392,6 +392,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  screen_state:
+    dependency: "direct main"
+    description:
+      name: screen_state
+      sha256: de85988dc39f03ab1a8bdadfdd4b0592d71842c161b065a6660dad62d4e42385
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.1"
   shared_preferences:
     dependency: "direct main"
     description:
