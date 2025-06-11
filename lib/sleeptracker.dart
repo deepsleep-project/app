@@ -30,13 +30,17 @@ class SleepTracker with WidgetsBindingObserver {
 
 void _startMonitoringScreen() async {
   try {
-    final stream = await _screen.screenStateStream;
+    final stream = _screen.screenStateStream;
     _screenSubscription = stream.listen((event) {
+      print("screen event: $event");
+      print("isScreenOff: $_isScreenOff");
+      print("wakeDebounce: $_wakeUpDebounce");
       if (event == ScreenStateEvent.SCREEN_OFF && !_isScreenOff) {
         _isScreenOff = true;
         print("屏幕关闭（锁屏）");
-      } else if (event == ScreenStateEvent.SCREEN_ON && _isScreenOff && _wakeUpDebounce) {
+      } else if (event == ScreenStateEvent.SCREEN_UNLOCKED && _isScreenOff && !_wakeUpDebounce) {
         _wakeUpDebounce = true;
+          print("准备开启屏幕");
         Future.delayed(Duration(milliseconds: 800), () {
           _isScreenOff = false;
           print("屏幕开启");
@@ -52,9 +56,9 @@ void _startMonitoringScreen() async {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Future.delayed(Duration(milliseconds: 500), () {
-      print("接收到事件：$state");
-      print("isSleeping: $_isScreenOff");
-      print("isScreenOff: $_isScreenOff");
+      // print("接收到事件：$state");
+      // print("isSleeping: $_isScreenOff");
+      // print("isScreenOff: $_isScreenOff");
       if (!isSleeping || _isScreenOff) return;
       if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive || state == AppLifecycleState.hidden) {
           print(state);
