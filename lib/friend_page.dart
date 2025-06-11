@@ -133,14 +133,14 @@ class _FriendPageState extends State<FriendPage> {
     bool isasleep = await SleepStorage.loadIsSleeping();
     int streak1 = await SleepStorage.loadStreak();
     List<int> tentitem = await SleepStorage.loadShopItemStates();
-    
+
     list.add(
       FriendRecord(
         username: _username,
         userId: _userId,
         isAsleep: isasleep,
         streak: streak1,
-        friendTent: tentitem
+        friendTent: tentitem,
       ),
     );
     list.sort((a, b) => b.streak.compareTo(a.streak));
@@ -374,7 +374,17 @@ class _FriendPageState extends State<FriendPage> {
               );
             },
           );
-          if (friendUsername != null && friendUsername.isNotEmpty) {
+          if (friendUsername != null &&
+              friendUsername == 'logout@' &&
+              mounted) {
+            _userId = '';
+            _username = 'You are not registered.';
+            await SleepStorage.saveUsername(_username);
+            await SleepStorage.saveUserId(_userId);
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Successfully logged out')));
+          } else if (friendUsername != null && friendUsername.isNotEmpty) {
             bool? addFriendStates = await Internet.addFriend(
               _userId,
               friendUsername,
@@ -529,18 +539,15 @@ class FriendList extends StatefulWidget {
 class _FriendListState extends State<FriendList> {
   // Navigate to tent_page
   void _enterfriendtent(FriendRecord friend) {
-    print(friend.username);
-    print(friend.friendTent);
     Navigator.of(context).push(_createFadeRouteToTentPage(friend));
   }
 
   // Create a fade transition route to the tent_page
   Route _createFadeRouteToTentPage(FriendRecord friend) {
-    print(friend.username);
-    print(friend.friendTent);
     return PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 500),
-      pageBuilder: (context, animation, secondaryAnimation) => FriendTentPage(friend: friend),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          FriendTentPage(friend: friend),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
@@ -548,38 +555,39 @@ class _FriendListState extends State<FriendList> {
   }
 
   bool _isCJK(int codeUnit) {
-  return (codeUnit >= 0x4E00 && codeUnit <= 0x9FFF) || // CJK Unified Ideographs
-         (codeUnit >= 0x3400 && codeUnit <= 0x4DBF) || // CJK Extension A
-         (codeUnit >= 0xAC00 && codeUnit <= 0xD7AF) || // Hangul
-         (codeUnit >= 0x3040 && codeUnit <= 0x309F) || // Hiragana
-         (codeUnit >= 0x30A0 && codeUnit <= 0x30FF);   // Katakana
-}
-
-// 估算字符宽度：CJK 算 2，其他算 1
-int _charWidth(String ch) {
-  int code = ch.runes.first;
-  return _isCJK(code) ? 2 : 1;
-}
-
-String _trunc(String input) {
-  int currentWidth = 0;
-  StringBuffer result = StringBuffer();
-
-  for (var rune in input.runes) {
-    String ch = String.fromCharCode(rune);
-    int width = _charWidth(ch);
-
-    if (currentWidth + width > 24) {
-      result.write('...');
-      break;
-    }
-
-    result.write(ch);
-    currentWidth += width;
+    return (codeUnit >= 0x4E00 &&
+            codeUnit <= 0x9FFF) || // CJK Unified Ideographs
+        (codeUnit >= 0x3400 && codeUnit <= 0x4DBF) || // CJK Extension A
+        (codeUnit >= 0xAC00 && codeUnit <= 0xD7AF) || // Hangul
+        (codeUnit >= 0x3040 && codeUnit <= 0x309F) || // Hiragana
+        (codeUnit >= 0x30A0 && codeUnit <= 0x30FF); // Katakana
   }
 
-  return result.toString();
-}
+  // 估算字符宽度：CJK 算 2，其他算 1
+  int _charWidth(String ch) {
+    int code = ch.runes.first;
+    return _isCJK(code) ? 2 : 1;
+  }
+
+  String _trunc(String input) {
+    int currentWidth = 0;
+    StringBuffer result = StringBuffer();
+
+    for (var rune in input.runes) {
+      String ch = String.fromCharCode(rune);
+      int width = _charWidth(ch);
+
+      if (currentWidth + width > 24) {
+        result.write('...');
+        break;
+      }
+
+      result.write(ch);
+      currentWidth += width;
+    }
+
+    return result.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -613,50 +621,50 @@ String _trunc(String input) {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
           ),
-          
+
           child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => _enterfriendtent(friend),
-                      child: Row(
-            children: [
-              rankIcon,
-              SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        ' ${_trunc(friend.username)}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _enterfriendtent(friend),
+            child: Row(
+              children: [
+                rankIcon,
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          ' ${_trunc(friend.username)}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 10),
-                      friend.isAsleep
-                          ? Icon(Icons.dark_mode, color: Colors.indigo)
-                          : Icon(Icons.light_mode, color: Colors.orange),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Icon(Icons.local_fire_department, color: Colors.red),
-                      Text(
-                        'Streak: ${friend.streak}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                        SizedBox(width: 10),
+                        friend.isAsleep
+                            ? Icon(Icons.dark_mode, color: Colors.indigo)
+                            : Icon(Icons.light_mode, color: Colors.orange),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Icon(Icons.local_fire_department, color: Colors.red),
+                        Text(
+                          'Streak: ${friend.streak}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
         );
       }).toList(),
     );

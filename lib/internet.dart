@@ -110,7 +110,7 @@ abstract class Internet {
             userId: ids[i],
             isAsleep: isAsleep,
             streak: strike1,
-            friendTent: friendtent
+            friendTent: friendtent,
           ),
         );
       }

@@ -206,11 +206,13 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
                           Icon(Icons.check_circle, color: Colors.green)
                         else
                           Icon(Icons.warning, color: Colors.orange),
-                        Text(
-                          isBedTimeHealthy
-                              ? "Bedtime is healthy"
-                              : "Set a heathier bedtime",
-                          style: TextStyle(fontSize: 18),
+                        Expanded(
+                          child: Text(
+                            isBedTimeHealthy
+                                ? "Bedtime is healthy"
+                                : "Set a heathier bedtime",
+                            style: TextStyle(fontSize: 18),
+                          ),
                         ),
                       ],
                     ),
@@ -222,11 +224,13 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
                           Icon(Icons.check_circle, color: Colors.green)
                         else
                           Icon(Icons.warning, color: Colors.orange),
-                        Text(
-                          isWakeTimeHealthy
-                              ? "Wake-up time is healthy"
-                              : "Set a healthier wake up time",
-                          style: TextStyle(fontSize: 18),
+                        Expanded(
+                          child: Text(
+                            isWakeTimeHealthy
+                                ? "Wake-up time is healthy"
+                                : "Set a healthier wake up time",
+                            style: TextStyle(fontSize: 18),
+                          ),
                         ),
                       ],
                     ),
@@ -240,16 +244,20 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
                           Icon(Icons.warning, color: Colors.orange),
 
                         if (isDurationHealthy)
-                          Text(
-                            "Sleep duration is ideal: ${sleepDuration.toStringAsFixed(1)} hrs",
-                            style: TextStyle(fontSize: 18),
+                          Expanded(
+                            child: Text(
+                              "Sleep duration is ideal: ${sleepDuration.toStringAsFixed(1)} hrs",
+                              style: TextStyle(fontSize: 18),
+                            ),
                           )
                         else
-                          Text(
-                            sleepDuration <= 7
-                                ? "Sleep duration too short: ${sleepDuration.toStringAsFixed(1)} hrs"
-                                : "Sleep duration too long: ${sleepDuration.toStringAsFixed(1)} hrs",
-                            style: TextStyle(fontSize: 18),
+                          Expanded(
+                            child: Text(
+                              sleepDuration <= 7
+                                  ? "Sleep duration too short: ${sleepDuration.toStringAsFixed(1)} hrs"
+                                  : "Sleep duration too long: ${sleepDuration.toStringAsFixed(1)} hrs",
+                              style: TextStyle(fontSize: 18),
+                            ),
                           ),
                       ],
                     ),

@@ -18,7 +18,10 @@ class _TentPageState extends State<ShopPage> {
   }
 
   void _tryToBuy(ShopItem item) async {
-    if (_status.contains(item.id)) {
+    if (_userId == '') {
+      _showSnackBar('Please register first');
+      return;
+    } else if (_status.contains(item.id)) {
       _showSnackBar('You already bought this item');
       return;
     } else {
@@ -143,7 +146,6 @@ class _TentPageState extends State<ShopPage> {
                     _buildItemViews(items[3]),
                   ],
                 ),
-                SizedBox(height: screenHeight * 0.008),
                 Row(
                   spacing: screenHeight * 0.05,
                   children: [
@@ -172,10 +174,13 @@ class _TentPageState extends State<ShopPage> {
       onTap: () => _tryToBuy(item),
       child: Column(
         children: [
-          Image.asset(
-            item.imagepath,
-            width: screenHeight * 0.13,
-            height: screenHeight * 0.13,
+          Opacity(
+            opacity: _status.contains(item.id) ? 0.5 : 1.0,
+            child: Image.asset(
+              item.imagepath,
+              width: screenHeight * 0.13,
+              height: screenHeight * 0.13,
+            ),
           ),
           Text(
             item.name,
