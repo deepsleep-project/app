@@ -547,6 +547,39 @@ class _FriendListState extends State<FriendList> {
     );
   }
 
+  bool _isCJK(int codeUnit) {
+  return (codeUnit >= 0x4E00 && codeUnit <= 0x9FFF) || // CJK Unified Ideographs
+         (codeUnit >= 0x3400 && codeUnit <= 0x4DBF) || // CJK Extension A
+         (codeUnit >= 0xAC00 && codeUnit <= 0xD7AF) || // Hangul
+         (codeUnit >= 0x3040 && codeUnit <= 0x309F) || // Hiragana
+         (codeUnit >= 0x30A0 && codeUnit <= 0x30FF);   // Katakana
+}
+
+// 估算字符宽度：CJK 算 2，其他算 1
+int _charWidth(String ch) {
+  int code = ch.runes.first;
+  return _isCJK(code) ? 2 : 1;
+}
+
+String _trunc(String input) {
+  int currentWidth = 0;
+  StringBuffer result = StringBuffer();
+
+  for (var rune in input.runes) {
+    String ch = String.fromCharCode(rune);
+    int width = _charWidth(ch);
+
+    if (currentWidth + width > 24) {
+      result.write('...');
+      break;
+    }
+
+    result.write(ch);
+    currentWidth += width;
+  }
+
+  return result.toString();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -594,7 +627,7 @@ class _FriendListState extends State<FriendList> {
                   Row(
                     children: [
                       Text(
-                        ' ${friend.username}',
+                        ' ${_trunc(friend.username)}',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
