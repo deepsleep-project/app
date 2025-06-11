@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'notification.dart';
 
 class SettingPage extends StatefulWidget {
@@ -19,7 +18,11 @@ class _SettingPageState extends State<SettingPage> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          TimePickerWithTap(),
+          Padding(
+            padding: EdgeInsets.only(left: 5, right: 5),
+            child: TimePickerWithTap(),
+          ),
+
           // Back button
           Positioned(
             top: screenHeight * 0.08, // adjust for padding/status bar
@@ -48,21 +51,8 @@ class TimePickerWithTap extends StatefulWidget {
 }
 
 class _TimePickerWithTapState extends State<TimePickerWithTap> {
-  int startHour = 0;
-  int startMinute = 0;
-  int endHour = 0;
-  int endMinute = 0;
-
-  Future<void> _loadInitialTargetState() async {
-    String targetSleepTime = await SleepStorage.loadTargetSleepTime();
-    String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
-    setState(() {
-      startHour = DateTime.parse(targetSleepTime).hour;
-      startMinute = DateTime.parse(targetSleepTime).minute;
-      endHour = DateTime.parse(targetWakeUpTime).hour;
-      endMinute = DateTime.parse(targetWakeUpTime).minute;
-    });
-  }
+  double bedtimeValue = 20; // 20:00 (8 PM)
+  double wakeTimeValue = 5; // 7:00 (7 AM)
 
   @override
   void initState() {
@@ -70,611 +60,393 @@ class _TimePickerWithTapState extends State<TimePickerWithTap> {
     _loadInitialTargetState();
   }
 
-  void _showStartTime() {
-    _showTimePickerDialog(
-      initialHour: startHour,
-      initialMinute: startMinute,
-      onConfirm: (h, m) {
-        setState(() {
-          startHour = h;
-          startMinute = m;
-        });
-      },
-    );
+  Future<void> _loadInitialTargetState() async {
+    String targetSleepTime = await SleepStorage.loadTargetSleepTime();
+    String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
+    final sleep = DateTime.parse(targetSleepTime);
+    final wake = DateTime.parse(targetWakeUpTime);
+
+    setState(() {
+      bedtimeValue = sleep.hour + sleep.minute / 60.0;
+      if (bedtimeValue < 20) bedtimeValue += 24; // Normalize to 20–26
+
+      wakeTimeValue = wake.hour + wake.minute / 60.0;
+    });
   }
 
-  void _showEndTime() {
-    _showTimePickerDialog(
-      initialHour: endHour,
-      initialMinute: endMinute,
-      onConfirm: (h, m) {
-        setState(() {
-          endHour = h;
-          endMinute = m;
-        });
-      },
-    );
-  }
+  void _saveTimes() {
+    int sleepHour = bedtimeValue.floor() % 24;
+    int sleepMinute = ((bedtimeValue % 1) * 60).round();
 
-  void _saveStartTime() {
-    String time = DateTime(
+    int wakeHour = wakeTimeValue.floor();
+    int wakeMinute = ((wakeTimeValue % 1) * 60).round();
+
+    final sleepTime = DateTime(
       2025,
       0,
       0,
-      startHour,
-      startMinute,
+      sleepHour,
+      sleepMinute,
     ).toIso8601String();
-    debugPrint(time);
-    AppNotification.publishSleepReminders(startHour, startMinute);
-    SleepStorage.saveTargetSleepTime(time);
+    final wakeTime = DateTime(
+      2025,
+      0,
+      0,
+      wakeHour,
+      wakeMinute,
+    ).toIso8601String();
+
+    SleepStorage.saveTargetSleepTime(sleepTime);
+    SleepStorage.saveTargetWakeUpTime(wakeTime);
+    // AppNotification.publishSleepReminders(sleepHour, sleepMinute);
   }
 
-  void _saveEndTime() {
-    String time = DateTime(2025, 0, 0, endHour, endMinute).toIso8601String();
-    debugPrint(time);
-    SleepStorage.saveTargetWakeUpTime(time);
+  String _formatTime(double value) {
+    int hour = value.floor() % 24;
+    int minute = ((value % 1) * 60).round();
+    return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
 
-  void _showTimePickerDialog({
-    required int initialHour,
-    required int initialMinute,
-    required Function(int, int) onConfirm,
-  }) {
-    int tempHour = initialHour;
-    int tempMinute = initialMinute;
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SizedBox(
-          height: 300,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Cancel"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      onConfirm(tempHour, tempMinute);
-                      Navigator.pop(context);
-                      _saveStartTime();
-                      _saveEndTime();
-                    },
-                    child: Text("Confirm"),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: CupertinoPicker(
-                        itemExtent: 40,
-                        scrollController: FixedExtentScrollController(
-                          initialItem: initialHour,
-                        ),
-                        onSelectedItemChanged: (index) {
-                          tempHour = index;
-                        },
-                        children: List.generate(
-                          24,
-                          (i) => Center(child: Text('$i')),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: CupertinoPicker(
-                        itemExtent: 40,
-                        scrollController: FixedExtentScrollController(
-                          initialItem: initialMinute,
-                        ),
-                        onSelectedItemChanged: (index) {
-                          tempMinute = index;
-                        },
-                        children: List.generate(
-                          60,
-                          (i) => Center(child: Text('$i')),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  String _formatTime(int h, int m) {
-    final hh = h.toString().padLeft(2, '0');
-    final mm = m.toString().padLeft(2, '0');
-    return '$hh:$mm';
+  double _calculateSleepDuration() {
+    double start = bedtimeValue >= 24 ? bedtimeValue - 24 : bedtimeValue;
+    double duration = wakeTimeValue - start;
+    if (duration < 0) duration += 24;
+    return duration;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Target Schedule",
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Text("Start Time", style: TextStyle(fontSize: 20)),
-                      GestureDetector(
-                        onTap: _showStartTime,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 12,
-                          ),
-                          margin: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _formatTime(startHour, startMinute),
-                            style: TextStyle(fontSize: 30),
-                          ),
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    double sleepDuration = _calculateSleepDuration();
+    bool isBedTimeHealthy = bedtimeValue >= 21 && bedtimeValue <= 24;
+    bool isWakeTimeHealthy = wakeTimeValue >= 6 && wakeTimeValue <= 10;
+    bool isDurationHealthy = sleepDuration >= 7 && sleepDuration <= 11;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            SizedBox(height: screenHeight * 0.005),
+            Text(
+              "Your sleep goals",
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 30),
+            _buildSlider(
+              label: "Target bedtime",
+              value: bedtimeValue,
+              min: 20,
+              max: 26,
+              onChanged: (val) => setState(() => bedtimeValue = val),
+              healthyRange: RangeValues(21, 24),
+            ),
+            Text(
+              "Selected: ${_formatTime(bedtimeValue)}",
+              style: TextStyle(fontSize: 20),
+            ),
+            SizedBox(height: 30),
+            _buildSlider(
+              label: "Target awake time",
+              value: wakeTimeValue,
+              min: 5,
+              max: 12,
+              onChanged: (val) => setState(() => wakeTimeValue = val),
+              healthyRange: RangeValues(6, 10),
+            ),
+            Text(
+              "Selected: ${_formatTime(wakeTimeValue)}",
+              style: TextStyle(fontSize: 20),
+            ),
+            SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color:
+                      (isBedTimeHealthy &&
+                          isWakeTimeHealthy &&
+                          isDurationHealthy)
+                      ? Colors.green[50]
+                      : Colors.orange[50],
+                  border: Border.all(
+                    color:
+                        (isBedTimeHealthy &&
+                            isWakeTimeHealthy &&
+                            isDurationHealthy)
+                        ? Colors.green
+                        : Colors.orange,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "📝 Sleep Goal Summary",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            (isBedTimeHealthy &&
+                                isWakeTimeHealthy &&
+                                isDurationHealthy)
+                            ? Colors.green[800]
+                            : Colors.orange[800],
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Row(
+                      spacing: 5,
+                      children: [
+                        if (isBedTimeHealthy)
+                          Icon(Icons.check_circle, color: Colors.green)
+                        else
+                          Icon(Icons.warning, color: Colors.orange),
+                        Text(
+                          isBedTimeHealthy
+                              ? "Bedtime is healthy"
+                              : "Set a heathier bedtime",
+                          style: TextStyle(fontSize: 18),
                         ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      spacing: 5,
+                      children: [
+                        if (isWakeTimeHealthy)
+                          Icon(Icons.check_circle, color: Colors.green)
+                        else
+                          Icon(Icons.warning, color: Colors.orange),
+                        Text(
+                          isWakeTimeHealthy
+                              ? "Wake-up time is healthy"
+                              : "Set a healthier wake up time",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      spacing: 5,
+                      children: [
+                        if (isDurationHealthy)
+                          Icon(Icons.check_circle, color: Colors.green)
+                        else
+                          Icon(Icons.warning, color: Colors.orange),
+
+                        if (isDurationHealthy)
+                          Text(
+                            "Sleep duration is ideal: ${sleepDuration.toStringAsFixed(1)} hrs",
+                            style: TextStyle(fontSize: 18),
+                          )
+                        else
+                          Text(
+                            sleepDuration <= 7
+                                ? "Sleep duration too short: ${sleepDuration.toStringAsFixed(1)} hrs"
+                                : "Sleep duration too long: ${sleepDuration.toStringAsFixed(1)} hrs",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                      ],
+                    ),
+                    if (isBedTimeHealthy &&
+                        isWakeTimeHealthy &&
+                        isDurationHealthy) ...[
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.emoji_emotions, color: Colors.green[700]),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Great job! Your sleep plan is in the healthy range.",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green[800],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                  Column(
-                    children: [
-                      Text("End Time", style: TextStyle(fontSize: 20)),
-                      GestureDetector(
-                        onTap: _showEndTime,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 12,
-                          ),
-                          margin: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _formatTime(endHour, endMinute),
-                            style: TextStyle(fontSize: 30),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-              SleepTimeBar(startHour: startHour, startMinute: startMinute),
-              WakeupTimeBar(endHour: endHour, endMinute: endMinute),
-              SleepDuration(
-                startHour: startHour,
-                startMinute: startMinute,
-                endHour: endHour,
-                endMinute: endMinute,
+            ),
+
+            SizedBox(height: 40),
+
+            SizedBox(
+              width: 180,
+              height: 50,
+              child: IconButton(
+                onPressed: () {
+                  _saveTimes();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Sleep goals saved!")));
+                },
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.grey.withAlpha(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                icon: Text(
+                  "Save goals",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class SleepTimeBar extends StatelessWidget {
-  final int startHour;
-  final int startMinute;
-
-  const SleepTimeBar({
-    super.key,
-    required this.startHour,
-    required this.startMinute,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 60.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            "Bed Time",
-            style: TextStyle(fontSize: 20),
-            textAlign: TextAlign.center,
+  Widget _buildSlider({
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required ValueChanged<double> onChanged,
+    required RangeValues healthyRange,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+        SizedBox(height: 10),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackShape: HealthRangeSliderTrackShape(
+              healthyRange: healthyRange,
+              min: min,
+              max: max,
+            ),
+            activeTrackColor: Colors.transparent,
+            inactiveTrackColor: Colors.grey[300], // fallback
+            thumbColor:
+                (value >= healthyRange.start && value <= healthyRange.end)
+                ? const Color.fromARGB(255, 46, 133, 49)
+                : const Color.fromARGB(255, 255, 167, 35),
+            overlayColor: Colors.deepPurple.withAlpha(32),
+            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 15),
+            trackHeight: 30,
           ),
-          SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              int adjustedStartHour = startHour;
-              if (adjustedStartHour < 12) adjustedStartHour += 24;
-              double startTime = (adjustedStartHour * 60 + startMinute) / 60;
-
-              // Bar settings
-              double minTime = 20.0;
-              double maxTime = 27.0;
-              double barWidth = constraints.maxWidth;
-              double pos = ((startTime - minTime) / (maxTime - minTime)).clamp(
-                0.0,
-                1.0,
-              );
-
-              // Healthy range: 8pm(20.0) - 0am(24.0)
-              double healthyStart = (20.0 - minTime) / (maxTime - minTime);
-              double healthyEnd = (24.0 - minTime) / (maxTime - minTime);
-
-              Color barColor = (startTime >= 20 && startTime <= 24)
-                  ? Colors.green
-                  : Colors.redAccent;
-
-              return Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      // Background bar
-                      Container(
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                      ),
-                      // Healthy range highlight
-                      Positioned(
-                        left: barWidth * healthyStart,
-                        child: Container(
-                          height: 18,
-                          width: barWidth * (healthyEnd - healthyStart),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                        ),
-                      ),
-                      // User's duration marker
-                      Positioned(
-                        left: barWidth * pos - 8,
-                        child: Container(
-                          width: 22,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: barColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.black26, width: 1),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.arrow_drop_up,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("20:00", style: TextStyle(fontSize: 14)),
-                      Text("03:00", style: TextStyle(fontSize: 14)),
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  if (startTime < 20 || startTime > 24)
-                    Text(
-                      "Try to set up a healthier bedtime",
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  else
-                    Text(
-                      "Good job on going to bed early!",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                ],
-              );
-            },
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: ((max - min) * 12).toInt(),
+            label: _formatTime(value),
+            onChanged: onChanged,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class WakeupTimeBar extends StatelessWidget {
-  final int endHour;
-  final int endMinute;
+class HealthRangeSliderTrackShape extends SliderTrackShape {
+  final RangeValues healthyRange;
+  final double min;
+  final double max;
 
-  const WakeupTimeBar({
-    super.key,
-    required this.endHour,
-    required this.endMinute,
+  HealthRangeSliderTrackShape({
+    required this.healthyRange,
+    required this.min,
+    required this.max,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 60.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            "Wake Up Time",
-            style: TextStyle(fontSize: 20),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              double endTime = (endHour * 60 + endMinute) / 60;
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    required RenderBox parentBox,
+    Offset? secondaryOffset,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+  }) {
+    final Canvas canvas = context.canvas;
+    final Rect trackRect = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: true,
+      isDiscrete: true,
+    );
 
-              // Bar settings
-              double minTime = 5.0;
-              double maxTime = 13.0;
-              double barWidth = constraints.maxWidth;
-              double pos = ((endTime - minTime) / (maxTime - minTime)).clamp(
-                0.0,
-                1.0,
-              );
+    final double trackStart = trackRect.left;
+    final double trackEnd = trackRect.right;
+    final double trackWidth = trackEnd - trackStart;
 
-              // Healthy range: 6:30am(6.5) - 10:30am(10.5)
-              double healthyStart = (6.5 - minTime) / (maxTime - minTime);
-              double healthyEnd = (10.5 - minTime) / (maxTime - minTime);
+    double startPx =
+        trackStart + ((healthyRange.start - min) / (max - min)) * trackWidth;
+    double endPx =
+        trackStart + ((healthyRange.end - min) / (max - min)) * trackWidth;
 
-              Color barColor = (endTime >= 6.5 && endTime <= 10.5)
-                  ? Colors.green
-                  : Colors.redAccent;
+    const Radius radius = Radius.circular(15);
 
-              return Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      // Background bar
-                      Container(
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                      ),
-                      // Healthy range highlight
-                      Positioned(
-                        left: barWidth * healthyStart,
-                        child: Container(
-                          height: 18,
-                          width: barWidth * (healthyEnd - healthyStart),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                        ),
-                      ),
-                      // User's duration marker
-                      Positioned(
-                        left: barWidth * pos - 8,
-                        child: Container(
-                          width: 22,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: barColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.black26, width: 1),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.arrow_drop_up,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("05:00", style: TextStyle(fontSize: 14)),
-                      Text("13:00", style: TextStyle(fontSize: 14)),
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  if (endTime < 6.5 || endTime > 10.5)
-                    Text(
-                      "Try to set up a healthier wake-up time",
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  else
-                    Text(
-                      "Good job on going to bed early!",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
+    // Paint full background track with rounded corners (grey)
+    final RRect fullTrackRRect = RRect.fromRectAndRadius(trackRect, radius);
+    canvas.drawRRect(fullTrackRRect, Paint()..color = Colors.grey[300]!);
+
+    // Paint healthy middle segment with its own rounded corners
+    final RRect healthyTrackRRect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(startPx, trackRect.top, endPx, trackRect.bottom),
+      Radius.circular(trackRect.height / 2),
+    );
+    canvas.drawRRect(
+      healthyTrackRRect,
+      Paint()..color = Colors.green.withAlpha(100),
+    );
+
+    // Paint active segment (left of thumb) — optional highlight
+    final RRect activeTrackRRect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(
+        trackStart,
+        trackRect.top,
+        thumbCenter.dx,
+        trackRect.bottom,
       ),
+      radius,
+    );
+    canvas.drawRRect(
+      activeTrackRRect,
+      Paint()..color = sliderTheme.activeTrackColor!,
     );
   }
-}
-
-class SleepDuration extends StatelessWidget {
-  final int startHour;
-  final int startMinute;
-  final int endHour;
-  final int endMinute;
-
-  const SleepDuration({
-    super.key,
-    required this.startHour,
-    required this.startMinute,
-    required this.endHour,
-    required this.endMinute,
-  });
 
   @override
-  Widget build(BuildContext context) {
-    // Sleep duration bar
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 60.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            "Sleep Duration",
-            style: TextStyle(fontSize: 20),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              // Calculate sleep duration in hours (handle overnight)
-              int startTotal = startHour * 60 + startMinute;
-              int endTotal = endHour * 60 + endMinute;
-              int durationMinutes = endTotal - startTotal;
-              if (durationMinutes <= 0) durationMinutes += 24 * 60;
-              double durationHours = durationMinutes / 60.0;
-
-              // Bar settings
-              double minHours = 5.0;
-              double maxHours = 11.0;
-              double barWidth = constraints.maxWidth;
-              double pos = ((durationHours - minHours) / (maxHours - minHours))
-                  .clamp(0.0, 1.0);
-
-              // Healthy range: 7-10 hours
-              double healthyStart = (7.0 - minHours) / (maxHours - minHours);
-              double healthyEnd = (10.0 - minHours) / (maxHours - minHours);
-
-              Color barColor = (durationHours >= 7 && durationHours <= 10)
-                  ? Colors.green
-                  : Colors.redAccent;
-
-              return Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      // Background bar
-                      Container(
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                      ),
-                      // Healthy range highlight
-                      Positioned(
-                        left: barWidth * healthyStart,
-                        child: Container(
-                          height: 18,
-                          width: barWidth * (healthyEnd - healthyStart),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                        ),
-                      ),
-                      // User's duration marker
-                      Positioned(
-                        left: barWidth * pos - 8,
-                        child: Container(
-                          width: 22,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: barColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.black26, width: 1),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.arrow_drop_up,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("5h", style: TextStyle(fontSize: 14)),
-                      Text("11h", style: TextStyle(fontSize: 14)),
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    "${durationHours.toStringAsFixed(1)} hours",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (durationHours < 7 || durationHours > 10)
-                    Text(
-                      "Aim for 7–10 hours for better health",
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  else
-                    Text(
-                      "Great job! Keep up your healthy sleep!",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = true,
+    bool isDiscrete = false,
+  }) {
+    final double trackHeight = sliderTheme.trackHeight ?? 4.0;
+    final double trackLeft = offset.dx + 12;
+    final double trackTop =
+        offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackWidth = parentBox.size.width - 24;
+    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }

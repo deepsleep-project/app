@@ -172,15 +172,12 @@ class DayWeekStat extends StatelessWidget {
         .toList();
 
     // Durations for last 7 days
-    List<double> last7Durations = last7
-        .map((r) {
-          final start = DateTime.parse(r.start);
-          final end = DateTime.parse(r.end);
-          double d = end.difference(start).inMinutes / 60.0;
-          return d < 0 ? 0 : d;
-        })
-        .toList()
-        .cast<double>();
+    List<double> last7Durations = last7.map((r) {
+      final start = DateTime.parse(r.start);
+      final end = DateTime.parse(r.end);
+      double d = end.difference(start).inMinutes / 60.0;
+      return d < 0 ? 0.0 : d;
+    }).toList();
 
     // Calculate average bed time
     DateTime? avgBedTime;
