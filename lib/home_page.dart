@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage>
       },
     );
   }
-  
+
   @override
   void dispose() {
     sleepTracker.stop();
@@ -153,6 +153,9 @@ class _HomePageState extends State<HomePage>
     String targetSleepTime = await SleepStorage.loadTargetSleepTime();
     String targetWakeUpTime = await SleepStorage.loadTargetWakeUpTime();
     List<SleepRecord> record = await SleepStorage.loadRecords();
+    if (_isSleeping) {
+      sleepTracker.start();
+    }
     setState(() {
       _userId = id;
       _isSleeping = sleeping;
