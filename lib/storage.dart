@@ -65,7 +65,7 @@ class SleepStorage {
 
   static Future<String> loadTargetSleepTime() async {
     return (await pref).getString('TargetSleepTime') ??
-        "2025-01-01T23:00:00.000000";
+        "2025-01-01T22:00:00.000000";
   }
 
   static Future<void> saveTargetSleepTime(String value) async {

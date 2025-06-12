@@ -25,33 +25,82 @@ class _FriendPageState extends State<FriendPage> {
   // ];
 
   // final List<FriendRecord> _exampleFriends = [
-  //   FriendRecord(username: 'Liam', userId: '25632', isAsleep: false, streak: 5),
-  //   FriendRecord(username: 'Dave', userId: '52767', isAsleep: true, streak: 8),
   //   FriendRecord(
   //     username: 'Michael',
   //     userId: '25632',
   //     isAsleep: false,
   //     streak: 9,
+  //     friendTent: [1, 3, 5],
   //   ),
   //   FriendRecord(
-  //     username: 'Pascal',
-  //     userId: '52767',
+  //     username: 'Alice',
+  //     userId: '12345',
   //     isAsleep: true,
-  //     streak: 16,
+  //     streak: 15,
+  //     friendTent: [2, 4, 6, 8],
   //   ),
   //   FriendRecord(
-  //     username: 'Oscar',
-  //     userId: '25632',
+  //     username: 'Bob',
+  //     userId: '23456',
   //     isAsleep: false,
-  //     streak: 2,
-  //   ),
-  //   FriendRecord(username: 'Maria', userId: '52767', isAsleep: true, streak: 5),
-  //   FriendRecord(username: 'Mark', userId: '52767', isAsleep: true, streak: 0),
-  //   FriendRecord(
-  //     username: 'Robbert',
-  //     userId: '52767',
-  //     isAsleep: true,
   //     streak: 7,
+  //     friendTent: [1, 4],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Charlie',
+  //     userId: '34567',
+  //     isAsleep: true,
+  //     streak: 12,
+  //     friendTent: [3, 5, 7],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Diana',
+  //     userId: '45678',
+  //     isAsleep: true,
+  //     streak: 20,
+  //     friendTent: [1, 2, 3, 4, 5, 6, 7, 8],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Eve',
+  //     userId: '56789',
+  //     isAsleep: true,
+  //     streak: 5,
+  //     friendTent: [2, 6, 8],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Frank',
+  //     userId: '67890',
+  //     isAsleep: true,
+  //     streak: 18,
+  //     friendTent: [1, 7, 8],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Grace',
+  //     userId: '78901',
+  //     isAsleep: true,
+  //     streak: 11,
+  //     friendTent: [3, 4, 5],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Helen',
+  //     userId: '89012',
+  //     isAsleep: false,
+  //     streak: 14,
+  //     friendTent: [2, 5, 8],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Ivan',
+  //     userId: '90123',
+  //     isAsleep: true,
+  //     streak: 8,
+  //     friendTent: [1, 6, 7],
+  //   ),
+  //   FriendRecord(
+  //     username: 'Judy',
+  //     userId: '01234',
+  //     isAsleep: false,
+  //     streak: 16,
+  //     friendTent: [4, 5, 8],
   //   ),
   // ];
 
@@ -73,6 +122,7 @@ class _FriendPageState extends State<FriendPage> {
     List<FriendRequest> requests = [];
     List<FriendRecord> friends = [];
     bool timeout = false;
+    bool hasResult = false;
 
     if (userId.isNotEmpty) {
       try {
@@ -85,6 +135,7 @@ class _FriendPageState extends State<FriendPage> {
               },
             ) ??
             [];
+        hasResult = true;
       } catch (_) {
         timeout = true;
       }
@@ -101,6 +152,7 @@ class _FriendPageState extends State<FriendPage> {
               },
             ) ??
             [];
+        hasResult = true;
       } catch (_) {
         timeout = true;
       }
@@ -121,7 +173,7 @@ class _FriendPageState extends State<FriendPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('You have new friend requests.')),
         );
-      } else {
+      } else if (!timeout && hasResult) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Successfully refreshed.')));
@@ -236,7 +288,7 @@ class _FriendPageState extends State<FriendPage> {
                     FriendList(
                       friends: _friends,
                       // friends: _exampleFriends.toList()
-                      //   ..sort((a, b) => b.streak.compareTo(a.streak)),
+                      //  ..sort((a, b) => b.streak.compareTo(a.streak)),
                     ),
                   ],
                 ],
@@ -314,17 +366,34 @@ class _FriendPageState extends State<FriendPage> {
               await SleepStorage.saveShopItemStates(items);
             }
           } else if (newUsername != null && newUsername.isNotEmpty) {
-            final id = await Internet.registerUser(newUsername);
-            setState(() {
-              _username = newUsername;
-              _userId = id ?? '';
-            });
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Request sent')));
 
-            if (_userId.isEmpty && mounted) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('Error registering user')));
+            final id = await Internet.registerUser(newUsername).timeout(
+              const Duration(seconds: 60),
+              onTimeout: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Network timeout: failed to reach server.'),
+                  ),
+                );
+                return;
+              },
+            );
+
+            if (!mounted) return;
+
+            if (id == null || id.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Error registering user')),
+              );
             } else {
+              setState(() {
+                _username = newUsername;
+                _userId = id;
+              });
+
               await SleepStorage.saveUsername(newUsername);
               await SleepStorage.saveUserId(_userId);
             }

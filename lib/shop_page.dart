@@ -127,7 +127,7 @@ class _TentPageState extends State<ShopPage> {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.225,
+            top: screenHeight * 0.222,
             left: screenHeight * 0.08,
             child: Column(
               children: [

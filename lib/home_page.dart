@@ -69,11 +69,11 @@ class _HomePageState extends State<HomePage>
       payload: 'item x',
     );
   }
+
   void _handleSleepCancelled() {
     _showSnackBar('you leave the app');
     _endSleep();
   }
-
 
   // Update and format the current time
   void _updateTime() {
@@ -145,6 +145,7 @@ class _HomePageState extends State<HomePage>
     sleepTracker.stop();
     super.dispose();
   }
+
   // Load the initial sleep state from storage
   Future<void> _loadInitialSleepState() async {
     String id = await SleepStorage.loadUserId();
@@ -156,6 +157,7 @@ class _HomePageState extends State<HomePage>
     if (_isSleeping) {
       sleepTracker.start();
     }
+
     setState(() {
       _userId = id;
       _isSleeping = sleeping;
@@ -168,7 +170,7 @@ class _HomePageState extends State<HomePage>
 
   int _calculateStreak(List<SleepRecord> records) {
     int streak = 0;
-    for (int i = 0; i < records.length; i++) {
+    for (int i = records.length - 1; i >= 0; i--) {
       if (!records[i].sleepRecordState) {
         break;
       }
@@ -312,40 +314,121 @@ class _HomePageState extends State<HomePage>
     return false;
   }
 
+  Widget _timeBox(String label, String time) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: SizedBox(
+        width: screenHeight * 0.06, // Fixed width
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              time,
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _durationString(String start, String end) {
+    final startTime = DateTime.parse(start);
+    final endTime = DateTime.parse(end);
+    final duration = endTime.difference(startTime);
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    return '${hours}h ${minutes}m';
+  }
+
   Future<void> _viewHistory() async {
     final records = await SleepStorage.loadRecords();
-    // final records = _exampleRecords;
+    // final records = exampleRecords;
     if (!context.mounted) return;
     showDialog(
       // ignore: use_build_context_synchronously
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('History'),
+        title: Text('Sleep history'),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
             itemCount: records.length,
             itemBuilder: (context, index) {
               final r = records[records.length - index - 1];
-              return ListTile(
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Date: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date))} State: ${r.sleepRecordState ? "Good" : "Bad"}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Start: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.start))}\n'
-                          'End: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(r.end))}',
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: r.sleepRecordState
+                        ? Colors.green[200]
+                        : Colors.orange[200],
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 14,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat('yyyy-MM-dd').format(DateTime.parse(r.date)),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _timeBox(
+                            "Slept",
+                            DateFormat('HH:mm').format(DateTime.parse(r.start)),
+                          ),
+                          Text(
+                            _durationString(r.start, r.end),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          _timeBox(
+                            "Awake",
+                            DateFormat('HH:mm').format(DateTime.parse(r.end)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -354,7 +437,7 @@ class _HomePageState extends State<HomePage>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Shut down'),
+            child: Text('Close'),
           ),
         ],
       ),
