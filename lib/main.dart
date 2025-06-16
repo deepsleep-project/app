@@ -8,14 +8,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Alarm.init();
   AppNotification.initializeAlarmListener();
-  const DarwinInitializationSettings initializationSettingsIOS =
-      DarwinInitializationSettings();
-
   const InitializationSettings initializationSettings = InitializationSettings(
     android: AndroidInitializationSettings('logo'),
-    iOS: initializationSettingsIOS,
+    iOS: DarwinInitializationSettings(),
   );
-
   await AppNotification.instance.initialize(initializationSettings);
 
   runApp(const MyApp());

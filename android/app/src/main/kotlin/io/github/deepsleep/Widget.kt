@@ -17,7 +17,7 @@ class Widget : AppWidgetProvider() {
         const val ACTION_REFRESH = "io.github.deepsleep.REFRESH_WIDGET"
         const val ACTION_REFRESH_APP = "io.github.deepsleep.REFRESH_APP"
         private const val PREFS_NAME = "FlutterSharedPreferences"
-        private const val SERVER_URL = "http://146.169.26.221:3000"
+        private const val SERVER_URL = "https://deepsleep.onrender.com"
 
         private fun postSleepStatus(uid: String, isSleeping: Boolean) {
             Thread {
