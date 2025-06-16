@@ -466,7 +466,7 @@ class _HomePageState extends State<HomePage>
       switchOutCurve: Curves.easeOut,
       child: _isSleeping
           ? _buildSleepingView(screenHeight)
-          : _buildAwakeView(screenHeight),
+          : _buildAwakeView(screenHeight, MediaQuery.of(context).size.width),
     );
   }
 
@@ -544,7 +544,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Widget _buildAwakeView(double screenHeight) {
+  Widget _buildAwakeView(double screenHeight, double screenWidth) {
     return Scaffold(
       key: ValueKey("awake"),
       body: Scaffold(
@@ -558,7 +558,10 @@ class _HomePageState extends State<HomePage>
               children: [
                 Align(
                   alignment: Alignment.bottomRight,
-                  child: DayNightImage(screenHeight: screenHeight),
+                  child: DayNightImage(
+                    screenHeight: screenHeight,
+                    screenWidth: screenWidth,
+                  ),
                 ),
                 Positioned(
                   top: screenHeight * 0.07,
@@ -786,8 +789,13 @@ class _HomePageState extends State<HomePage>
 
 class DayNightImage extends StatelessWidget {
   final double screenHeight;
+  final double screenWidth;
 
-  const DayNightImage({super.key, required this.screenHeight});
+  const DayNightImage({
+    super.key,
+    required this.screenHeight,
+    required this.screenWidth,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -802,6 +810,11 @@ class DayNightImage extends StatelessWidget {
       imagePath = 'assets/sunset.png';
     }
 
-    return Image.asset(imagePath, fit: BoxFit.fill, height: screenHeight);
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.fill,
+      height: screenHeight,
+      width: screenWidth,
+    );
   }
 }
