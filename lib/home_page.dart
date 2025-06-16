@@ -454,6 +454,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     _loadInitialSleepState();
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     if (_isSleeping) {
       AppNotification.cancelTodaySleepReminder();
     }
@@ -465,12 +466,12 @@ class _HomePageState extends State<HomePage>
       switchInCurve: Curves.easeIn,
       switchOutCurve: Curves.easeOut,
       child: _isSleeping
-          ? _buildSleepingView(screenHeight)
-          : _buildAwakeView(screenHeight, MediaQuery.of(context).size.width),
+          ? _buildSleepingView(screenHeight, screenWidth)
+          : _buildAwakeView(screenHeight, screenWidth),
     );
   }
 
-  Widget _buildSleepingView(double screenHeight) {
+  Widget _buildSleepingView(double screenHeight, double screenWidth) {
     return Scaffold(
       key: ValueKey("asleep"),
       body: PageView(
@@ -486,8 +487,9 @@ class _HomePageState extends State<HomePage>
                 alignment: Alignment.bottomRight,
                 child: Image.asset(
                   'assets/night.png',
-                  fit: BoxFit.fitHeight,
+                  fit: BoxFit.fill,
                   height: screenHeight,
+                  width: screenWidth,
                 ),
               ),
               Transform.translate(
