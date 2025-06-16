@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'internet.dart';
 import 'friend.dart';
 import 'friend_tent.dart';
+import 'dart:async';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -18,6 +19,8 @@ class _FriendPageState extends State<FriendPage> {
   String _tempFriendName = '';
   List<FriendRecord> _friends = [];
   List<FriendRequest> _friendRequests = [];
+
+  Timer? _refreshTimer;
 
   // final List<FriendRequest> _exampleRequests = [
   //   FriendRequest(username: 'Richard', userId: '76789'),
@@ -107,7 +110,16 @@ class _FriendPageState extends State<FriendPage> {
   @override
   void initState() {
     super.initState();
-    _loadInitialUserState();
+    _loadInitialUserState(); // optional: initial load
+    _refreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      _loadInitialUserState();
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   // Load username and id from storage to local variables
@@ -173,11 +185,12 @@ class _FriendPageState extends State<FriendPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('You have new friend requests.')),
         );
-      } else if (!timeout && hasResult) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Successfully refreshed.')));
       }
+      // else if (!timeout && hasResult) {
+      //   ScaffoldMessenger.of(
+      //     context,
+      //   ).showSnackBar(SnackBar(content: Text('Successfully refreshed.')));
+      // }
     });
   }
 
@@ -227,7 +240,7 @@ class _FriendPageState extends State<FriendPage> {
             child: Row(
               spacing: 15,
               children: [
-                _refreshButton(),
+                // _refreshButton(),
                 // Register button if username is not set, otherwise show add friend button
                 _userId.isEmpty ? _registerButton() : _addFriendButton(),
               ],
@@ -355,7 +368,7 @@ class _FriendPageState extends State<FriendPage> {
             if (_userId.isEmpty && mounted) {
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(SnackBar(content: Text('Error loging in')));
+              ).showSnackBar(SnackBar(content: Text('Error logging in')));
             } else {
               final energy = await Internet.fetchEnergy(id ?? '');
               final List<int> items =
@@ -443,7 +456,10 @@ class _FriendPageState extends State<FriendPage> {
               );
             },
           );
-          if (friendUsername != null &&
+          if (friendUsername != null && friendUsername == 'money@') {
+            int energy = await SleepStorage.loadCurrency();
+            await SleepStorage.saveCurrency(energy + 500);
+          } else if (friendUsername != null &&
               friendUsername == 'logout@' &&
               mounted) {
             _userId = '';

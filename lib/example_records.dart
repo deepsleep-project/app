@@ -2,34 +2,6 @@ import 'package:deepsleep/storage.dart';
 
 // Example sleep records with varied times
 final List<SleepRecord> exampleRecords = [
-  // Monday, May 5, 2025
-  SleepRecord(
-    start: DateTime.utc(2025, 5, 5, 22, 45).toIso8601String(),
-    end: DateTime.utc(2025, 5, 6, 6, 55).toIso8601String(),
-    date: DateTime.utc(2025, 5, 5, 0, 0).toIso8601String(),
-    sleepRecordState: true,
-  ),
-  // Tuesday, May 6, 2025
-  SleepRecord(
-    start: DateTime.utc(2025, 5, 6, 23, 10).toIso8601String(),
-    end: DateTime.utc(2025, 5, 7, 7, 5).toIso8601String(),
-    date: DateTime.utc(2025, 5, 6, 0, 0).toIso8601String(),
-    sleepRecordState: true,
-  ),
-  // Wednesday, May 7, 2025
-  SleepRecord(
-    start: DateTime.utc(2025, 5, 7, 22, 55).toIso8601String(),
-    end: DateTime.utc(2025, 5, 8, 6, 45).toIso8601String(),
-    date: DateTime.utc(2025, 5, 7, 0, 0).toIso8601String(),
-    sleepRecordState: true,
-  ),
-  // Thursday, May 8, 2025
-  SleepRecord(
-    start: DateTime.utc(2025, 5, 8, 23, 20).toIso8601String(),
-    end: DateTime.utc(2025, 5, 9, 7, 10).toIso8601String(),
-    date: DateTime.utc(2025, 5, 8, 0, 0).toIso8601String(),
-    sleepRecordState: true,
-  ),
   // Friday, May 9, 2025
   SleepRecord(
     start: DateTime.utc(2025, 5, 9, 23, 5).toIso8601String(),
@@ -266,6 +238,34 @@ final List<SleepRecord> exampleRecords = [
     start: DateTime.utc(2025, 6, 12, 22, 34).toIso8601String(),
     end: DateTime.utc(2025, 6, 13, 7, 00).toIso8601String(),
     date: DateTime.utc(2025, 6, 12, 0, 0).toIso8601String(),
+    sleepRecordState: true,
+  ),
+  // Friday, June 13, 2025
+  SleepRecord(
+    start: DateTime.utc(2025, 6, 13, 22, 45).toIso8601String(),
+    end: DateTime.utc(2025, 6, 14, 6, 55).toIso8601String(),
+    date: DateTime.utc(2025, 6, 13, 0, 0).toIso8601String(),
+    sleepRecordState: true,
+  ),
+  // Saturday, June 14, 2025
+  SleepRecord(
+    start: DateTime.utc(2025, 6, 14, 23, 10).toIso8601String(),
+    end: DateTime.utc(2025, 6, 15, 7, 5).toIso8601String(),
+    date: DateTime.utc(2025, 6, 14, 0, 0).toIso8601String(),
+    sleepRecordState: true,
+  ),
+  // Sunday, June 15, 2025
+  SleepRecord(
+    start: DateTime.utc(2025, 6, 15, 22, 55).toIso8601String(),
+    end: DateTime.utc(2025, 6, 16, 6, 45).toIso8601String(),
+    date: DateTime.utc(2025, 6, 15, 0, 0).toIso8601String(),
+    sleepRecordState: true,
+  ),
+  // Monday, June 16, 2025
+  SleepRecord(
+    start: DateTime.utc(2025, 6, 16, 23, 20).toIso8601String(),
+    end: DateTime.utc(2025, 6, 17, 7, 10).toIso8601String(),
+    date: DateTime.utc(2025, 6, 16, 0, 0).toIso8601String(),
     sleepRecordState: true,
   ),
 ];
